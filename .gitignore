@@ -74,3 +74,10 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
+
+# --- Secrets folder for API keys, paid assets, and anything we do not want to publish on github Ignores everything except the placeholder ---
+Assets/Secrets/*
+!Assets/Secrets/.gitkeep
+
+# --- Paid asset Plugins that can't be moved to the Secrets folder
+Assets/Plugins/Sirenix/
