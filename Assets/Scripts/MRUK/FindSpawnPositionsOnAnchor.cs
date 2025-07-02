@@ -23,7 +23,10 @@ using System.Collections.Generic;
 using System.Linq;
 using ChoreChampion.XR.MRUtilityKit;
 using Meta.XR.Util;
+#if ODIN_INSPECTOR
 using Sirenix.OdinInspector;
+using Sirenix.OdinInspector.Editor;
+#endif
 using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.Serialization;
