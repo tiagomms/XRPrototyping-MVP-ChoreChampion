@@ -79,3 +79,5 @@ crashlytics-build.properties
 Assets/Secrets/*
 !Assets/Secrets/.gitkeep
 
+# --- Paid asset Plugins that can't be moved to the Secrets folder
+Assets/Plugins/Sirenix/
