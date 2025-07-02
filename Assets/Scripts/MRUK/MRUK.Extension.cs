@@ -29,6 +29,19 @@ namespace ChoreChampion.XR.MRUtilityKit
         }
 
         /// <summary>
+        /// Closest anchor based on the closest surface position (while respecting the filters)
+        /// </summary>
+        /// <param name="labels">if null. selects all possible (returns closest anchor)</param>
+        /// <param name="worldPos">World position to deduce this</param>
+        /// <returns></returns>
+        public static MRUKAnchor GetClosestAnchorBasedOnSurfacePosition(MRUKAnchor.SceneLabels? labels, Vector3 worldPos)
+        {
+            LabelFilter labelFilterBasedOnAnchorLabel = new(labels, null);
+            MRUK.Instance.GetCurrentRoom().TryGetClosestSurfacePosition(worldPos, out Vector3 surfacePosition, out MRUKAnchor newAnchor, labelFilterBasedOnAnchorLabel);
+            return newAnchor;
+        }
+
+        /// <summary>
         /// Show all anchors of a given type in the room.
         /// </summary>
         /// <param name="room">The room to show anchors in.</param>

@@ -177,7 +177,7 @@ namespace Meta.XR.MRUtilityKit
         [Button]
         public void SetHardcodedGameAnchor()
         {
-            SetGameAnchor(GameAnchorSelection.GetClosestAnchorBasedOnSurfacePosition(null, FindFirstObjectByType<Camera>().transform.position));
+            SetGameAnchor(MRUKExtension.GetClosestAnchorBasedOnSurfacePosition(null, FindFirstObjectByType<Camera>().transform.position));
         }
 
         #endregion

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ChoreChampion.XR.MRUtilityKit;
 using Meta.XR.Util;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
@@ -53,7 +54,7 @@ namespace Meta.XR.MRUtilityKit
         public void SetDefaultGameAnchor()
         {
             // TODO: Right now I will set up the code from the closest anchor of type X to test, if not null
-            GameAnchor = GetClosestAnchorBasedOnSurfacePosition(EligibleGameAnchorLabels, cameraTransform.position);
+            GameAnchor = MRUKExtension.GetClosestAnchorBasedOnSurfacePosition(EligibleGameAnchorLabels, cameraTransform.position);
 
             onSelectGameAnchor.Invoke(GameAnchor);
         }
@@ -80,12 +81,6 @@ namespace Meta.XR.MRUtilityKit
             }
         }
 
-        public static MRUKAnchor GetClosestAnchorBasedOnSurfacePosition(MRUKAnchor.SceneLabels? labels, Vector3 worldPos)
-        {
-            LabelFilter labelFilterBasedOnAnchorLabel = new(labels, null);
-            MRUK.Instance.GetCurrentRoom().TryGetClosestSurfacePosition(worldPos, out Vector3 surfacePosition, out MRUKAnchor anchor, labelFilterBasedOnAnchorLabel);
-            return anchor;
-        }
 
     }
 }
