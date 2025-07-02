@@ -50,7 +50,9 @@ namespace Meta.XR.MRUtilityKit
             this.SpawnOnStart = MRUK.RoomFilter.None;
         }
 
+#if ODIN_INSPECTOR
         [Button]
+#endif
         public void SetDefaultGameAnchor()
         {
             // TODO: Right now I will set up the code from the closest anchor of type X to test, if not null
@@ -62,7 +64,9 @@ namespace Meta.XR.MRUtilityKit
         /// <summary>
         /// Toggle MRUK Anchors to make them visible - may be important for debugging
         /// </summary>
+#if ODIN_INSPECTOR
         [Button]
+#endif
         public void ToggleMrukAnchors()
         {
             // ???: unsure this part is needed - to select may be important

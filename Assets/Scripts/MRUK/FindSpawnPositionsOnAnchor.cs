@@ -149,8 +149,9 @@ namespace Meta.XR.MRUtilityKit
             gameAnchorSelection.onSelectGameAnchor.RemoveListener(SetGameAnchor);
         }
 
-
+#if ODIN_INSPECTOR
         [Button]
+#endif
         public void SpawnOnCurrentRoom()
         {
             if (MRUK.Instance && MRUK.Instance.IsInitialized)
@@ -174,7 +175,9 @@ namespace Meta.XR.MRUtilityKit
         /// <summary>
         /// In case we don't have GameAnchorSelection - we need to set one
         /// </summary>
+#if ODIN_INSPECTOR
         [Button]
+#endif        
         public void SetHardcodedGameAnchor()
         {
             SetGameAnchor(MRUKExtension.GetClosestAnchorBasedOnSurfacePosition(null, FindFirstObjectByType<Camera>().transform.position));
