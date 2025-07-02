@@ -18,8 +18,10 @@
  * limitations under the License.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using ChoreChampion.XR.MRUtilityKit;
 using Meta.XR.Util;
 using Sirenix.OdinInspector;
 using UnityEditor.VersionControl;
@@ -36,11 +38,8 @@ namespace Meta.XR.MRUtilityKit
     /// </summary>
     public class FindSpawnPositionsOnAnchor : MonoBehaviour
     {
-        /// <summary>
-        /// Anchor prefab spawner will help on selecting the correct anchor where we start our game
-        /// </summary>
-        [Tooltip("Volume/Surface Anchor MRUK displayer")]
-        [SerializeField] private AnchorPrefabSpawner _anchorPrefabSpawner;
+        [Tooltip("Class that selects Game Anchor.")]
+        [SerializeField] private GameAnchorSelection gameAnchorSelection;
 
         /// <summary>
         /// Volume/Plane where our game will play out
@@ -72,9 +71,6 @@ namespace Meta.XR.MRUtilityKit
         [SerializeField, Tooltip("Maximum number of times to attempt spawning/moving an object before giving up.")]
         public int MaxIterations = 1000;
 
-        [Header("Debug")]
-        [SerializeField, Tooltip("To help on setting a hardcoded Game Anchor based on player position.")] private Transform cameraTransform;
-
 
         /// <summary>
         /// Defines possible locations where objects can be spawned.
@@ -88,27 +84,12 @@ namespace Meta.XR.MRUtilityKit
             HangingDown // Spawn on surfaces facing downwards such as the ceiling
         }
 
-        struct Surface
-        {
-            public MRUKAnchor Anchor;
-            public float UsableArea;
-            public bool IsPlane;
-            public Rect Bounds;
-            public Matrix4x4 Transform;
-        }
 
         /// <summary>
         /// Attach content to scene surfaces.
         /// </summary>
         [SerializeField, Tooltip("Attach content to scene surfaces.")]
         public SpawnLocation SpawnLocations = SpawnLocation.OnTopOfSurfaces;
-
-        /// <summary>
-        /// When using surface spawning, use this to filter which anchor labels should be included. Eg, spawn only on TABLE or OTHER.
-        /// ???: due to limitations of MRUK I will need to use this anyway - there is no MRUKRoom method to GetRandomPositionInAnchor
-        /// </summary>
-        [SerializeField, Tooltip("When using surface spawning, use this to filter which anchor labels should be included. Eg, spawn only on TABLE or OTHER.")]
-        public MRUKAnchor.SceneLabels Labels = ~(MRUKAnchor.SceneLabels)0;
 
         /// <summary>
         /// If enabled then the spawn position will be checked to make sure there is no overlap with physics colliders including themselves.
@@ -150,93 +131,50 @@ namespace Meta.XR.MRUtilityKit
         /// <summary>
         /// List of game anchor surfaces
         /// </summary>
-        private List<Surface> _gameAnchorSurfaces;
+        private List<MRUKExtension.Surface> _gameAnchorSurfaces;
 
         private int _currentSpawnedObjects;
         public int CurrentSpawnedObjects => _currentSpawnedObjects;
 
-        // We want to initialize the spawner in the current room, but we don't want to spawn anything yet.
-        // So we disable the anchor prefab spawner.
-        private void Awake()
-        {
-            _anchorPrefabSpawner.gameObject.SetActive(false);
-        }
 
         private void Start()
         {
-            /*
-            //OVRTelemetry.Start(TelemetryConstants.MarkerId.LoadFindSpawnPositions).Send();
-            if (MRUK.Instance && SpawnOnStart != MRUK.RoomFilter.None)
-            {
-                MRUK.Instance.RegisterSceneLoadedCallback(() =>
-                {
-                    switch (SpawnOnStart)
-                    {
-                        case MRUK.RoomFilter.AllRooms:
-                            StartSpawn();
-                            break;
-                        case MRUK.RoomFilter.CurrentRoomOnly:
-                            StartSpawn(MRUK.Instance.GetCurrentRoom());
-                            break;
-                    }
-                });
-            }
-            */
-        }
-
-        [Button]
-        /// <summary>
-        /// Initialize the spawner in the current room.
-        /// </summary>
-        public void Initialize()
-        {
             // NOTE: important part - calculates prefab bounds used here
             CalculatePrefabBounds();
+            gameAnchorSelection.onSelectGameAnchor.AddListener(SetGameAnchor);
+        }
 
-            // ???: unsure this part is needed - to select may be important
-            if (MRUK.Instance && MRUK.Instance.IsInitialized)
-            {
-                _anchorPrefabSpawner.gameObject.SetActive(true);
-            }
-        }
-        [Button]
-        public void SelectGameAnchor()
+        private void OnDestroy()
         {
-            // TODO: Right now I will set up the code from the closest anchor of type X to test, if not null
-            SetHardcodedGameAnchor();
+            gameAnchorSelection.onSelectGameAnchor.RemoveListener(SetGameAnchor);
         }
+
 
         [Button]
         public void SpawnOnCurrentRoom()
         {
-            var currentRoom = MRUK.Instance.GetCurrentRoom();
-            if (_gameAnchor == null)
+            if (MRUK.Instance && MRUK.Instance.IsInitialized)
             {
-                Debug.LogError($"[{nameof(FindSpawnPositionsOnAnchor)}] - ERROR: No GameAnchor defined yet. Please set one before proceeding");
+                var currentRoom = MRUK.Instance.GetCurrentRoom();
+                if (_gameAnchor == null)
+                {
+                    Debug.LogError($"[{nameof(FindSpawnPositionsOnAnchor)}] - ERROR: No GameAnchor defined yet. Please set one before proceeding");
+                    return;
+                }
+
+                SpawnObjectsInGameAnchor(currentRoom, _gameAnchor);
+            }
+            else
+            {
+                Debug.LogWarning($"[{nameof(FindSpawnPositionsOnAnchor)}] - MRUK not initialized yet");
             }
 
-            SpawnObjectsInGameAnchor(currentRoom, _gameAnchor);
         }
 
-        private void SetHardcodedGameAnchor()
+        #region SETTERS
+        public void SetGameAnchor(MRUKAnchor arg0)
         {
-            if (_gameAnchor == null)
-            {
-                LabelFilter labelFilterBasedOnAnchorLabel = new(Labels, null);
-                MRUK.Instance.GetCurrentRoom().TryGetClosestSurfacePosition(cameraTransform.position, out Vector3 surfacePosition, out _gameAnchor, labelFilterBasedOnAnchorLabel);
-            }
-        }
-
-
-        /// <summary>
-        /// Show all anchors of a given type in the room.
-        /// </summary>
-        /// <param name="room">The room to show anchors in.</param>
-        /// <param name="labels">The labels to show.</param>
-        /// <returns>A list of anchors of the given type.</returns>
-        public List<MRUKAnchor> ShowAnchorsOfType(MRUKRoom room, MRUKAnchor.SceneLabels labels)
-        {
-            return room.Anchors.Where(anchor => anchor.HasAnyLabel(labels)).ToList();
+            _gameAnchor = arg0;
         }
 
         public void SetSpawnAmount(int newMax)
@@ -250,6 +188,7 @@ namespace Meta.XR.MRUtilityKit
             SpawnObject = newPrefab;
             CalculatePrefabBounds();
         }
+        #endregion
 
         /// <summary>
         /// 
@@ -425,7 +364,7 @@ namespace Meta.XR.MRUtilityKit
             if (_gameAnchorSurfaces == null)
             {
                 //???: since it is always the same anchor, there is no point in recalculting every time (I think)
-                _gameAnchorSurfaces = GetAnchorSurfaces(surfaceTypes, minDistanceToEdge, anchor, ref totalUsableSurfaceArea);
+                _gameAnchorSurfaces = MRUKExtension.GetAnchorSurfaces(surfaceTypes, minDistanceToEdge, anchor, ref totalUsableSurfaceArea);
                 if (_gameAnchorSurfaces.Count == 0)
                 {
                     Debug.LogError($"[{nameof(FindSpawnPositionsOnAnchor)} - {nameof(_gameAnchorSurfaces)}]: Anchor {anchor.name} does not have surfaces!");
@@ -466,178 +405,6 @@ namespace Meta.XR.MRUtilityKit
             }
 
             return false;
-        }
-
-
-        /// <summary>
-        /// FROM MRUKRoom.cs - extracted from GenerateRandomPositionOnSurface - since we are using the same anchor over and over again, no need to calculate it every time
-        /// </summary>
-        /// <param name="surfaceTypes"></param>
-        /// <param name="minDistanceToEdge"></param>
-        /// <param name="anchor"></param>
-        /// <param name="totalUsableSurfaceArea"></param>
-        /// <returns></returns>
-        /// <exception cref="System.Exception"></exception>
-        private static List<Surface> GetAnchorSurfaces(MRUK.SurfaceType surfaceTypes, float minDistanceToEdge, MRUKAnchor anchor, ref float totalUsableSurfaceArea)
-        {
-            List<Surface> surfaces = new();
-            float minWidth = 2f * minDistanceToEdge;
-            if (anchor.PlaneRect.HasValue)
-            {
-                bool skipPlane = false;
-                if (anchor.transform.forward.y >= Utilities.InvSqrt2)
-                {
-                    if ((surfaceTypes & MRUK.SurfaceType.FACING_UP) == 0)
-                    {
-                        skipPlane = true;
-                    }
-                }
-                else if (anchor.transform.forward.y <= -Utilities.InvSqrt2)
-                {
-                    if ((surfaceTypes & MRUK.SurfaceType.FACING_DOWN) == 0)
-                    {
-                        skipPlane = true;
-                    }
-                }
-                else if ((surfaceTypes & MRUK.SurfaceType.VERTICAL) == 0)
-                {
-                    skipPlane = true;
-                }
-
-                if (!skipPlane)
-                {
-                    var size = anchor.PlaneRect.Value.size;
-                    if (size.x > minWidth && size.y > minWidth)
-                    {
-                        var usableArea = (size.x - minWidth) * (size.y - minWidth);
-                        totalUsableSurfaceArea += usableArea;
-                        surfaces.Add(new()
-                        {
-                            Anchor = anchor,
-                            UsableArea = usableArea,
-                            IsPlane = true,
-                            Bounds = anchor.PlaneRect.Value,
-                            Transform = anchor.transform.localToWorldMatrix
-                        });
-                    }
-                }
-            }
-
-            if (anchor.VolumeBounds.HasValue)
-            {
-                for (int i = 0; i < 6; ++i)
-                {
-                    Rect bounds;
-                    Matrix4x4 faceTransform;
-                    if (i == 0)
-                    {
-                        if ((surfaceTypes & MRUK.SurfaceType.FACING_UP) == 0)
-                        {
-                            continue;
-                        }
-                    }
-                    else if (i == 1)
-                    {
-                        if ((surfaceTypes & MRUK.SurfaceType.FACING_DOWN) == 0)
-                        {
-                            continue;
-                        }
-                    }
-                    else if ((surfaceTypes & MRUK.SurfaceType.VERTICAL) == 0)
-                    {
-                        continue;
-                    }
-
-                    switch (i)
-                    {
-                        case 0:
-                            // +Z face
-                            bounds = new()
-                            {
-                                xMin = anchor.VolumeBounds.Value.min.x,
-                                xMax = anchor.VolumeBounds.Value.max.x,
-                                yMin = anchor.VolumeBounds.Value.min.y,
-                                yMax = anchor.VolumeBounds.Value.max.y
-                            };
-                            faceTransform = Matrix4x4.TRS(new Vector3(0f, 0f, anchor.VolumeBounds.Value.max.z), Quaternion.identity, Vector3.one);
-                            break;
-                        case 1:
-                            // -Z face
-                            bounds = new()
-                            {
-                                xMin = -anchor.VolumeBounds.Value.max.x,
-                                xMax = -anchor.VolumeBounds.Value.min.x,
-                                yMin = anchor.VolumeBounds.Value.min.y,
-                                yMax = anchor.VolumeBounds.Value.max.y
-                            };
-                            faceTransform = Matrix4x4.TRS(new Vector3(0f, 0f, anchor.VolumeBounds.Value.min.z), Quaternion.Euler(0f, 180f, 0f), Vector3.one);
-                            break;
-                        case 2:
-                            // +X face
-                            bounds = new()
-                            {
-                                xMin = -anchor.VolumeBounds.Value.max.z,
-                                xMax = -anchor.VolumeBounds.Value.min.z,
-                                yMin = anchor.VolumeBounds.Value.min.y,
-                                yMax = anchor.VolumeBounds.Value.max.y
-                            };
-                            faceTransform = Matrix4x4.TRS(new Vector3(anchor.VolumeBounds.Value.max.x, 0f, 0f), Quaternion.Euler(0f, 90f, 0f), Vector3.one);
-                            break;
-                        case 3:
-                            // -X face
-                            bounds = new()
-                            {
-                                xMin = anchor.VolumeBounds.Value.min.z,
-                                xMax = anchor.VolumeBounds.Value.max.z,
-                                yMin = anchor.VolumeBounds.Value.min.y,
-                                yMax = anchor.VolumeBounds.Value.max.y
-                            };
-                            faceTransform = Matrix4x4.TRS(new Vector3(anchor.VolumeBounds.Value.min.x, 0f, 0f), Quaternion.Euler(0f, -90f, 0f), Vector3.one);
-                            break;
-                        case 4:
-                            // +Y face
-                            bounds = new()
-                            {
-                                xMin = anchor.VolumeBounds.Value.min.x,
-                                xMax = anchor.VolumeBounds.Value.max.x,
-                                yMin = -anchor.VolumeBounds.Value.max.z,
-                                yMax = -anchor.VolumeBounds.Value.min.z
-                            };
-                            faceTransform = Matrix4x4.TRS(new Vector3(0f, anchor.VolumeBounds.Value.max.y, 0f), Quaternion.Euler(-90f, 0f, 0f), Vector3.one);
-                            break;
-                        case 5:
-                            // -Y face
-                            bounds = new()
-                            {
-                                xMin = anchor.VolumeBounds.Value.min.x,
-                                xMax = anchor.VolumeBounds.Value.max.x,
-                                yMin = anchor.VolumeBounds.Value.min.z,
-                                yMax = anchor.VolumeBounds.Value.max.z
-                            };
-                            faceTransform = Matrix4x4.TRS(new Vector3(0f, anchor.VolumeBounds.Value.min.y, 0f), Quaternion.Euler(90f, 0f, 0f), Vector3.one);
-                            break;
-                        default:
-                            throw new System.Exception();
-                    }
-
-                    var size = bounds.size;
-                    if (size.x > minWidth && size.y > minWidth)
-                    {
-                        var usableArea = (size.x - minWidth) * (size.y - minWidth);
-                        totalUsableSurfaceArea += usableArea;
-                        surfaces.Add(new()
-                        {
-                            Anchor = anchor,
-                            UsableArea = usableArea,
-                            IsPlane = false,
-                            Bounds = bounds,
-                            Transform = anchor.transform.localToWorldMatrix * faceTransform
-                        });
-                    }
-                }
-            }
-
-            return surfaces;
         }
     }
 }
