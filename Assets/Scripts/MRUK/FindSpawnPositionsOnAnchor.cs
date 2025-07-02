@@ -168,8 +168,19 @@ namespace Meta.XR.MRUtilityKit
             {
                 Debug.LogWarning($"[{nameof(FindSpawnPositionsOnAnchor)}] - MRUK not initialized yet");
             }
-
         }
+
+        #region DEBUG
+        /// <summary>
+        /// In case we don't have GameAnchorSelection - we need to set one
+        /// </summary>
+        [Button]
+        public void SetHardcodedGameAnchor()
+        {
+            SetGameAnchor(GameAnchorSelection.GetClosestAnchorBasedOnSurfacePosition(null, FindFirstObjectByType<Camera>().transform.position));
+        }
+
+        #endregion
 
         #region SETTERS
         public void SetGameAnchor(MRUKAnchor arg0)
