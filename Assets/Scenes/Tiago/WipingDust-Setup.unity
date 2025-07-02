@@ -17680,7 +17680,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1495097900
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17695,15 +17695,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SpawnOnStart: 1
   SpawnObject: {fileID: 8240749116634132180, guid: 7cab184fcd1d83f42bed80f9db3e36ee, type: 3}
-  SpawnAmount: 3
+  SpawnAmount: 10000
   MaxIterations: 1000
   SpawnLocations: 3
-  Labels: 136
+  Labels: 8
   CheckOverlaps: 1
   OverrideBounds: -1
   LayerMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 55
   SurfaceClearanceDistance: 0.1
 --- !u!114 &1495097901
 MonoBehaviour:
@@ -20978,6 +20978,84 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.009499997, y: 0.01770607, z: -0.0011095554}
     m_Extent: {x: 0.04527676, y: 0.05372102, z: 0.06648618}
   m_DirtyAABB: 0
+--- !u!1 &1783563226
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1783563229}
+  - component: {fileID: 1783563228}
+  - component: {fileID: 1783563227}
+  m_Layer: 0
+  m_Name: '[BuildingBlock] Spawn Positions On Anchor'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1783563227
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1783563226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ee88c56d6374f744aee1bc68b35c9f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _anchorPrefabSpawner: {fileID: 1292130355}
+  _gameAnchor: {fileID: 0}
+  SpawnOnStart: 1
+  SpawnObject: {fileID: 8240749116634132180, guid: 52bbf2140d10f5e4abc37fd8f05e243f, type: 3}
+  SpawnAmount: 10000
+  MaxIterations: 1000
+  cameraTransform: {fileID: 1819571763}
+  SpawnLocations: 3
+  Labels: 9
+  CheckOverlaps: 1
+  OverrideBounds: -1
+  LayerMask:
+    serializedVersion: 2
+    m_Bits: 55
+  SurfaceClearanceDistance: 0.2
+--- !u!114 &1783563228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1783563226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b023183069df224080314a560e6e1ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blockId: 93762ef0-9738-45f4-bb87-bdb9a0acb994
+  instanceId: 4fdc1dd5-dfe6-4c20-9d56-6c5e0ac06200
+  version: 1
+  installationRoutineCheckpoint:
+    _installationRoutineId: 
+    _installationVariants: []
+--- !u!4 &1783563229
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1783563226}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1790064201
 GameObject:
   m_ObjectHideFlags: 0
@@ -25276,6 +25354,7 @@ SceneRoots:
   - {fileID: 560383340}
   - {fileID: 49093313}
   - {fileID: 1292130357}
+  - {fileID: 1783563229}
   - {fileID: 1495097902}
   - {fileID: 757681816}
   - {fileID: 1936973162}
