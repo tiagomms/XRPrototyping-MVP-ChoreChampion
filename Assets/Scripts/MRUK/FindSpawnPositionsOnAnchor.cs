@@ -190,6 +190,10 @@ namespace Meta.XR.MRUtilityKit
         /// </summary>
         public void Initialize()
         {
+            // NOTE: important part - calculates prefab bounds used here
+            CalculatePrefabBounds();
+
+            // ???: unsure this part is needed - to select may be important
             if (MRUK.Instance && MRUK.Instance.IsInitialized)
             {
                 _anchorPrefabSpawner.gameObject.SetActive(true);
@@ -203,7 +207,7 @@ namespace Meta.XR.MRUtilityKit
         }
 
         [Button]
-        public void StartSpawnOnCurrentRoom()
+        public void SpawnOnCurrentRoom()
         {
             var currentRoom = MRUK.Instance.GetCurrentRoom();
             if (_gameAnchor == null)
@@ -211,7 +215,7 @@ namespace Meta.XR.MRUtilityKit
                 Debug.LogError($"[{nameof(FindSpawnPositionsOnAnchor)}] - ERROR: No GameAnchor defined yet. Please set one before proceeding");
             }
 
-            StartSpawn(currentRoom);
+            SpawnObjectsInGameAnchor(currentRoom, _gameAnchor);
         }
 
         private void SetHardcodedGameAnchor()
@@ -235,20 +239,16 @@ namespace Meta.XR.MRUtilityKit
             return room.Anchors.Where(anchor => anchor.HasAnyLabel(labels)).ToList();
         }
 
-        /// <summary>
-        /// Starts the spawning process for a specific room. A maximum of <see cref="MaxIterations"/> attempts will be made to find a valid spawn position.
-        /// <see cref="MRUKRoom.GenerateRandomPositionInRoom"/> and <see cref="MRUKRoom.GenerateRandomPositionOnSurface"/> are used to generate the positions.
-        /// </summary>
-        /// <param name="room">The room to spawn objects in.</param>
-        public void StartSpawn(MRUKRoom room)
-        {
-            CalculatePrefabBounds();
-            bool flowControl = SpawnObjectsInGameAnchor(room, _gameAnchor, true);
-        }
-
         public void SetSpawnAmount(int newMax)
         {
             SpawnAmount = newMax;
+        }
+
+
+        public void SetNewPrefab(GameObject newPrefab)
+        {
+            SpawnObject = newPrefab;
+            CalculatePrefabBounds();
         }
 
         /// <summary>
@@ -258,7 +258,7 @@ namespace Meta.XR.MRUtilityKit
         /// <param name="anchor"></param>
         /// <param name="isCalculatingMaxSpawnedObjects">Max amount of spawned objects is calculated based on not being able to place any other object in here. Important when running the first time</param>
         /// <returns></returns>
-        private bool SpawnObjectsInGameAnchor(MRUKRoom room, MRUKAnchor anchor, bool isCalculatingMaxSpawnedObjects = false)
+        private bool SpawnObjectsInGameAnchor(MRUKRoom room, MRUKAnchor anchor)
         {
             int i = _currentSpawnedObjects;
             while (i < SpawnAmount)
