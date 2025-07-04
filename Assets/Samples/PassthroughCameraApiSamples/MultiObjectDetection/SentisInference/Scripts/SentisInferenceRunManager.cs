@@ -40,6 +40,8 @@ namespace PassthroughCameraSamples.MultiObjectDetection
         protected Tensor<int> m_pullLabelIDs;
         protected bool m_isWaiting = false;
 
+        protected bool m_doesModelIdentifyOnlyOneThing;
+
         #region Unity Functions
         protected virtual IEnumerator Start()
         {
@@ -164,10 +166,13 @@ namespace PassthroughCameraSamples.MultiObjectDetection
             // Get the output 1 (labels ID data) from the model output using Sentis pull request.
             Debug.Log($"Sentis - [PollRequestLabelIDs]");
 
+            // TODO: protect code from if model returns one thing or not - PeekOutput(1) if model detects multiple things, PeekOutput(0) and some other type if detects one thing well
             m_pullLabelIDs = m_engine.PeekOutput(1) as Tensor<int>;
             if (m_pullLabelIDs.dataOnBackend != null)
             {
+                Debug.Log($"Sentis - [PollRequestLabelIDs] - pullLabelIDs before ReadbackRequest: {m_pullLabelIDs}");
                 m_pullLabelIDs.ReadbackRequest();
+                Debug.Log($"Sentis - [PollRequestLabelIDs] - pullLabelIDs after ReadbackRequest: {m_pullLabelIDs}");
                 m_isWaiting = true;
             }
             else
