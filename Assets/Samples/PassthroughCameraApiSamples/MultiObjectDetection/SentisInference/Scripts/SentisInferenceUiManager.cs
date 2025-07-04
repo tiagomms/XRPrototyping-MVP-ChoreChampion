@@ -252,8 +252,9 @@ namespace PassthroughCameraSamples.MultiObjectDetection
         {
             // Get the 3D marker world position using Depth Raycast
             var centerPixel = new Vector2Int(Mathf.RoundToInt(perX * camRes.x), Mathf.RoundToInt((1.0f - perY) * camRes.y));
+            Vector3? worldPos;
 #if !UNITY_EDITOR
-            var ray = PassthroughCameraUtils.ScreenPointToRayInWorld(cameraEye, centerPixel);
+            var ray = PassthroughCameraUtils.ScreenPointToRayInWorld(CameraEye, centerPixel);
 #else
             if (testImageManager == null)
             {
@@ -285,11 +286,11 @@ namespace PassthroughCameraSamples.MultiObjectDetection
             var yOffset = (perY - 0.5f) * imageHeight;
 
             // Calculate the world position by offsetting from the raw image's center
-            var worldPosition = rawImagePosition +
+            worldPos = rawImagePosition +
                               rawImageRotation * new Vector3(xOffset, yOffset, 0);
 
 
-            Debug.Log($"[CalculateWorldPosition] UNITY_EDITOR {(worldPosition - debugCamera.transform.position)}; perX: {perX}; perY: {perY}; width {imageWidth}; height: {imageHeight}; Offsets x {xOffset}; y {yOffset}");
+            Debug.Log($"[CalculateWorldPosition] UNITY_EDITOR {(worldPos - debugCamera.transform.position)}; perX: {perX}; perY: {perY}; width {imageWidth}; height: {imageHeight}; Offsets x {xOffset}; y {yOffset}");
             // Create a ray from the camera to this point
             if (debugCamera == null)
             {
@@ -297,18 +298,13 @@ namespace PassthroughCameraSamples.MultiObjectDetection
                 return null;
             }
 
-            var ray = new Ray(debugCamera.transform.position, (worldPosition - debugCamera.transform.position).normalized);
+            var ray = new Ray(debugCamera.transform.position, ((Vector3)worldPos - debugCamera.transform.position).normalized);
 #endif
-            Vector3? worldPos;
-
+            
             // NOTE: way of avoiding Oculus altogether if you just want to test on UNITY EDITOR the Unity Sentis
             if (OVRManager.instance != null)
             {
                 worldPos = environmentRaycast.PlaceGameObjectByScreenPos(ray);
-            }
-            else
-            {
-                worldPos = worldPosition;
             }
 
             return worldPos;
