@@ -6,7 +6,6 @@ using Meta.XR.Util;
 using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
 
 namespace Meta.XR.MRUtilityKit
 {
@@ -33,6 +32,10 @@ namespace Meta.XR.MRUtilityKit
         [Header("Debug")]
         [SerializeField, Tooltip("To help on setting a hardcoded Game Anchor based on player position.")]
         private Transform cameraTransform;
+
+        [SerializeField, Tooltip("Start with Anchor Prefabs Visible")]
+        private bool areAnchorsVisibleOnStart;
+
         private bool _areAnchorsVisible = false;
 
         public UnityEvent<MRUKAnchor> onSelectGameAnchor;
@@ -43,9 +46,42 @@ namespace Meta.XR.MRUtilityKit
             // TODO: this will not use anchor prefab spawner, instead we will have a ray that allow us to select what is the game area 
             // The anchor prefab spawner may still exist to help users know which volume/plane they want to clean
             // this works because MRUK.Instance.RegisterSceneLoadedCallback event triggers even if room has been initialized a long time ago
-            
+
             // so it makes sure it does not spawn prefabs on start
-            this.SpawnOnStart = MRUK.RoomFilter.None;
+            //this.SpawnOnStart = MRUK.RoomFilter.None;
+        }
+
+        protected override void Start()
+        {
+            if (MRUK.Instance is null)
+            {
+                return;
+            }
+            _areAnchorsVisible = areAnchorsVisibleOnStart;
+
+            MRUK.Instance.RegisterSceneLoadedCallback(() =>
+            {
+                if (SpawnOnStart == MRUK.RoomFilter.None)
+                {
+                    return;
+                }
+
+                switch (SpawnOnStart)
+                {
+                    case MRUK.RoomFilter.CurrentRoomOnly:
+                        SpawnPrefabs(MRUK.Instance.GetCurrentRoom());
+                        ToggleMrukAnchorsVisibility();
+                        break;
+                    case MRUK.RoomFilter.AllRooms:
+                        SpawnPrefabs();
+                        ToggleMrukAnchorsVisibility();
+                        break;
+                    case MRUK.RoomFilter.None:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            });
         }
 
         [Button]
@@ -61,21 +97,18 @@ namespace Meta.XR.MRUtilityKit
         /// Toggle MRUK Anchors to make them visible - may be important for debugging
         /// </summary>
         [Button]
-        public void ToggleMrukAnchors()
+        public void ToggleMrukAnchorsVisibility()
         {
-            // ???: unsure this part is needed - to select may be important
-            if (MRUK.Instance && MRUK.Instance.IsInitialized)
-            {
-                _areAnchorsVisible = !_areAnchorsVisible;
+            SetMrukAnchorsVisibility(_areAnchorsVisible);
+            _areAnchorsVisible = !_areAnchorsVisible; // toggle value
 
-                if (_areAnchorsVisible)
-                {
-                    SpawnPrefabs(MRUK.Instance.GetCurrentRoom());
-                }
-                else 
-                {
-                    ClearPrefabs();
-                }
+        }
+
+        public void SetMrukAnchorsVisibility(bool isVisible)
+        {
+            foreach (var item in AnchorPrefabSpawnerObjects)
+            {
+                item.Value.GetComponentInChildren<MeshRenderer>().enabled = isVisible;
             }
         }
 
