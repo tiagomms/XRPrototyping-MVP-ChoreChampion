@@ -21,13 +21,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ChoreChampion.XR.MRUtilityKit;
+using Meta.XR.MRUtilityKit;
 using Meta.XR.Util;
 using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace Meta.XR.MRUtilityKit
+namespace ChoreChampion.XR.MRUtilityKit
 {
     /// <summary>
     /// Allows for fast generation of valid (inside the room, outside furniture bounds) random positions for content spawning.
@@ -72,23 +72,10 @@ namespace Meta.XR.MRUtilityKit
 
 
         /// <summary>
-        /// Defines possible locations where objects can be spawned.
-        /// </summary>
-        public enum SpawnLocation
-        {
-            Floating, // Spawn somewhere floating in the free space within the room
-            AnySurface, // Spawn on any surface (i.e. a combination of all 3 options below)
-            VerticalSurfaces, // Spawn only on vertical surfaces such as walls, windows, wall art, doors, etc...
-            OnTopOfSurfaces, // Spawn on surfaces facing upwards such as ground, top of tables, beds, couches, etc...
-            HangingDown // Spawn on surfaces facing downwards such as the ceiling
-        }
-
-
-        /// <summary>
         /// Attach content to scene surfaces.
         /// </summary>
         [SerializeField, Tooltip("Attach content to scene surfaces.")]
-        public SpawnLocation SpawnLocations = SpawnLocation.OnTopOfSurfaces;
+        public MRUKSpawnLocation SpawnLocations = MRUKSpawnLocation.OnTopOfSurfaces;
 
         /// <summary>
         /// If enabled then the spawn position will be checked to make sure there is no overlap with physics colliders including themselves.
@@ -216,7 +203,7 @@ namespace Meta.XR.MRUtilityKit
                 {
                     Vector3 spawnPosition = Vector3.zero;
                     Vector3 spawnNormal = Vector3.zero;
-                    if (SpawnLocations == SpawnLocation.Floating)
+                    if (SpawnLocations == MRUKSpawnLocation.Floating)
                     {
                         var randomPos = room.GenerateRandomPositionInRoom(_minRadius, true);
                         if (!randomPos.HasValue)
@@ -231,18 +218,18 @@ namespace Meta.XR.MRUtilityKit
                         MRUK.SurfaceType surfaceType = 0;
                         switch (SpawnLocations)
                         {
-                            case SpawnLocation.AnySurface:
+                            case MRUKSpawnLocation.AnySurface:
                                 surfaceType |= MRUK.SurfaceType.FACING_UP;
                                 surfaceType |= MRUK.SurfaceType.VERTICAL;
                                 surfaceType |= MRUK.SurfaceType.FACING_DOWN;
                                 break;
-                            case SpawnLocation.VerticalSurfaces:
+                            case MRUKSpawnLocation.VerticalSurfaces:
                                 surfaceType |= MRUK.SurfaceType.VERTICAL;
                                 break;
-                            case SpawnLocation.OnTopOfSurfaces:
+                            case MRUKSpawnLocation.OnTopOfSurfaces:
                                 surfaceType |= MRUK.SurfaceType.FACING_UP;
                                 break;
-                            case SpawnLocation.HangingDown:
+                            case MRUKSpawnLocation.HangingDown:
                                 surfaceType |= MRUK.SurfaceType.FACING_DOWN;
                                 break;
                         }

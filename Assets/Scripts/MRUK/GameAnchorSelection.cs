@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ChoreChampion.XR.MRUtilityKit;
+using Meta.XR.MRUtilityKit;
 using Meta.XR.Util;
 using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Meta.XR.MRUtilityKit
+namespace ChoreChampion.XR.MRUtilityKit
 {
     /// <summary>
     /// Allows for fast generation of valid (inside the room, outside furniture bounds) random positions for content spawning.

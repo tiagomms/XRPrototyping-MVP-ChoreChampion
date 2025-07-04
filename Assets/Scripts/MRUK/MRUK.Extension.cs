@@ -1,19 +1,23 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using AOT;
-using Unity.Collections;
-using UnityEngine.Android;
-using UnityEngine.Assertions;
-using UnityEngine.Rendering;
 using System.Linq;
 using Meta.XR.MRUtilityKit;
 
+
 namespace ChoreChampion.XR.MRUtilityKit
 {
+    /// <summary>
+    /// Defines possible locations where objects can be spawned.
+    /// </summary>
+    public enum MRUKSpawnLocation
+    {
+        Floating, // Spawn somewhere floating in the free space within the room
+        AnySurface, // Spawn on any surface (i.e. a combination of all 3 options below)
+        VerticalSurfaces, // Spawn only on vertical surfaces such as walls, windows, wall art, doors, etc...
+        OnTopOfSurfaces, // Spawn on surfaces facing upwards such as ground, top of tables, beds, couches, etc...
+        HangingDown // Spawn on surfaces facing downwards such as the ceiling
+    }
     public class MRUKExtension
     {
         /// <summary>
