@@ -23,11 +23,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ChoreChampion.XR.MRUtilityKit;
 using Meta.XR.Util;
-#if ODIN_INSPECTOR
-using Sirenix.OdinInspector;
-using Sirenix.OdinInspector.Editor;
-#endif
-using UnityEditor.VersionControl;
+using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -152,9 +148,7 @@ namespace Meta.XR.MRUtilityKit
             gameAnchorSelection.onSelectGameAnchor.RemoveListener(SetGameAnchor);
         }
 
-#if ODIN_INSPECTOR
         [Button]
-#endif
         public void SpawnOnCurrentRoom()
         {
             if (MRUK.Instance && MRUK.Instance.IsInitialized)
@@ -178,9 +172,7 @@ namespace Meta.XR.MRUtilityKit
         /// <summary>
         /// In case we don't have GameAnchorSelection - we need to set one
         /// </summary>
-#if ODIN_INSPECTOR
         [Button]
-#endif        
         public void SetHardcodedGameAnchor()
         {
             SetGameAnchor(MRUKExtension.GetClosestAnchorBasedOnSurfacePosition(null, FindFirstObjectByType<Camera>().transform.position));
