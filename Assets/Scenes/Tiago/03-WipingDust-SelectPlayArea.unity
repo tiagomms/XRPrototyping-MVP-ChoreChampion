@@ -12481,6 +12481,9 @@ MonoBehaviour:
   EligibleGameAnchorLabels: 9
   cameraTransform: {fileID: 1088010140}
   areAnchorsVisibleOnStart: 0
+  onCompleteSpawnPrefabs:
+    m_PersistentCalls:
+      m_Calls: []
   onSelectGameAnchor:
     m_PersistentCalls:
       m_Calls: []
@@ -16131,7 +16134,7 @@ MonoBehaviour:
   _gameAnchor: {fileID: 0}
   SpawnOnStart: 1
   SpawnObject: {fileID: 6599131453534862029, guid: 37e11dd5f0a489e42962d2a179e4d4ef, type: 3}
-  SpawnAmount: 1
+  SpawnAmountPerSurface: 1
   MaxIterations: 10
   SpawnLocations: 3
   CheckOverlaps: 0
@@ -16145,7 +16148,7 @@ MonoBehaviour:
   fixedLocalPositions:
   - {x: 0, y: 0}
   shufflePositions: 0
-  incrementalOffsetPerIteration: 0.002
+  incrementalOffsetPerIteration: 0.005
 --- !u!1 &1415188360
 GameObject:
   m_ObjectHideFlags: 0
@@ -18419,7 +18422,7 @@ MonoBehaviour:
   _gameAnchor: {fileID: 0}
   SpawnOnStart: 1
   SpawnObject: {fileID: 8240749116634132180, guid: 52bbf2140d10f5e4abc37fd8f05e243f, type: 3}
-  SpawnAmount: 8
+  SpawnAmountPerSurface: 8
   MaxIterations: 10
   SpawnLocations: 3
   CheckOverlaps: 0
@@ -25870,7 +25873,7 @@ MonoBehaviour:
   _gameAnchor: {fileID: 0}
   SpawnOnStart: 1
   SpawnObject: {fileID: 8240749116634132180, guid: 52bbf2140d10f5e4abc37fd8f05e243f, type: 3}
-  SpawnAmount: 3
+  SpawnAmountPerSurface: 1000
   MaxIterations: 1000
   SpawnLocations: 3
   CheckOverlaps: 1

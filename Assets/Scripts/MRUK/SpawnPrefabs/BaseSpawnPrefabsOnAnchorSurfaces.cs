@@ -9,11 +9,21 @@ using UnityEngine.Serialization;
 namespace ChoreChampion.XR.MRUtilityKit
 {
     /// <summary>
-    /// Base class for managing spawn positions relative to game anchors.
+    /// Base class for managing spawn positions relative to MRUK anchors.
     /// Provides shared fields, anchor detection, and extensibility points for spawn logic.
     /// </summary>
     public abstract class BaseSpawnPrefabsOnAnchorSurfaces : MonoBehaviour
     {
+        /// <summary>
+        /// Anchor's Surface data, useful for prefab spawning on surfaces
+        /// </summary>
+        public struct AnchorSurfaceData
+        {
+            public MRUK.SurfaceType SurfaceTypes;
+            public List<MRUKExtension.Surface> SurfaceList;
+            public float TotalUsableSurfaceArea;
+        }
+
         [Tooltip("Class that selects Game Anchor.")]
         [SerializeField] protected GameAnchorSelection gameAnchorSelection;
 
@@ -36,10 +46,10 @@ namespace ChoreChampion.XR.MRUtilityKit
         public GameObject SpawnObject;
 
         /// <summary>
-        /// Number of SpawnObject(s) to place into the scene per room, only applies to Prefabs.
+        /// Number of SpawnObject(s) to place into the scene per surface, only applies to Prefabs.
         /// </summary>
-        [SerializeField, Tooltip("Number of SpawnObject(s) to place into the scene per room, only applies to Prefabs.")]
-        public int SpawnAmount = 1000;
+        [SerializeField, Tooltip("Number of SpawnObject(s) to place into the scene per surface, only applies to Prefabs.")]
+        public int SpawnAmountPerSurface = 1000;
 
         /// <summary>
         /// Maximum number of times to attempt spawning/moving an object before giving up.
@@ -101,15 +111,24 @@ namespace ChoreChampion.XR.MRUtilityKit
         protected float _centerOffset;
 
         /// <summary>
-        /// List of game anchor surfaces
-        /// </summary>
-        protected List<MRUKExtension.Surface> _gameAnchorSurfaces;
-
-        /// <summary>
         /// Current number of spawned objects.
         /// </summary>
+        protected Dictionary<MRUKAnchor, AnchorSurfaceData> anchorsSurfaceData;
+
         protected int _currentSpawnedObjects;
         public int CurrentSpawnedObjects => _currentSpawnedObjects;
+
+        protected void OnValidate()
+        {
+            if (gameAnchorSelection == null)
+            {
+                gameAnchorSelection = FindFirstObjectByType<GameAnchorSelection>();
+                if (gameAnchorSelection == null)
+                {
+                    Debug.LogError($"[{GetType()}] - ERROR: requires {nameof(GameAnchorSelection)} object in game");
+                }
+            }
+        }
 
         /// <summary>
         /// Unity Start: calculates prefab bounds and subscribes to anchor selection events.
@@ -118,10 +137,9 @@ namespace ChoreChampion.XR.MRUtilityKit
         {
             // NOTE: important part - calculates prefab bounds used here
             CalculatePrefabBounds();
-            if (gameAnchorSelection != null)
-            {
-                gameAnchorSelection.onSelectGameAnchor.AddListener(SetGameAnchor);
-            }
+            gameAnchorSelection.onCompleteSpawnPrefabs.AddListener(BuildAnchorsSurfaceDataDictionary);
+            gameAnchorSelection.onSelectGameAnchor.AddListener(SetGameAnchor);
+
         }
 
         /// <summary>
@@ -129,80 +147,10 @@ namespace ChoreChampion.XR.MRUtilityKit
         /// </summary>
         protected virtual void OnDestroy()
         {
-            if (gameAnchorSelection != null)
-            {
-                gameAnchorSelection.onSelectGameAnchor.RemoveListener(SetGameAnchor);
-            }
+            gameAnchorSelection.onCompleteSpawnPrefabs.RemoveListener(BuildAnchorsSurfaceDataDictionary);
+            gameAnchorSelection.onSelectGameAnchor.RemoveListener(SetGameAnchor);
         }
 
-        /// <summary>
-        /// Spawns objects on the current room.
-        /// </summary>
-        [Button]
-        public virtual void SpawnOnCurrentRoom()
-        {
-            if (MRUK.Instance && MRUK.Instance.IsInitialized)
-            {
-                var currentRoom = MRUK.Instance.GetCurrentRoom();
-                if (_gameAnchor == null)
-                {
-                    Debug.LogError($"[{GetType().Name}] - ERROR: No GameAnchor defined yet. Please set one before proceeding");
-                    return;
-                }
-
-                SpawnObjectsInGameAnchor(currentRoom, _gameAnchor);
-            }
-            else
-            {
-                Debug.LogWarning($"[{GetType().Name}] - MRUK not initialized yet");
-            }
-        }
-
-        /// <summary>
-        /// In case we don't have GameAnchorSelection - we need to set one
-        /// </summary>
-        [Button]
-        public virtual void SetHardcodedGameAnchor()
-        {
-            SetGameAnchor(MRUKExtension.GetClosestAnchorBasedOnSurfacePosition(null, FindFirstObjectByType<Camera>().transform.position));
-        }
-
-        /// <summary>
-        /// Sets the game anchor reference.
-        /// </summary>
-        /// <param name="anchor">Anchor to set.</param>
-        public virtual void SetGameAnchor(MRUKAnchor anchor)
-        {
-            _gameAnchor = anchor;
-        }
-
-        /// <summary>
-        /// Sets the prefab to be spawned and triggers any necessary recalculation.
-        /// </summary>
-        /// <param name="newPrefab">The new prefab to spawn.</param>
-        public virtual void SetNewPrefab(GameObject newPrefab)
-        {
-            SpawnObject = newPrefab;
-            CalculatePrefabBounds();
-        }
-
-        /// <summary>
-        /// Sets the spawn amount.
-        /// </summary>
-        /// <param name="newMax">New maximum spawn amount.</param>
-        public virtual void SetSpawnAmount(int newMax)
-        {
-            SpawnAmount = newMax;
-        }
-
-        /// <summary>
-        /// Utility for derived classes: checks if the anchor is valid.
-        /// </summary>
-        /// <returns>True if anchor is valid, false otherwise.</returns>
-        protected bool HasValidAnchor()
-        {
-            return _gameAnchor != null;
-        }
 
         /// <summary>
         /// FROM FindSpawnPositions.cs - get prefab bounds and calculate adjusted bounds in order to reuse them later on.
@@ -243,23 +191,132 @@ namespace ChoreChampion.XR.MRUtilityKit
         }
 
         /// <summary>
+        /// Every anchor that may use this - needs the list of surfaces where objects may spawn and the toal usable surface area (for random spawns)
+        /// </summary>
+        protected virtual void BuildAnchorsSurfaceDataDictionary()
+        {
+            anchorsSurfaceData = new();
+            MRUK.SurfaceType surfaceTypes = GetSurfaceTypes();
+
+            foreach (var keyPair in gameAnchorSelection.AnchorPrefabSpawnerObjects)
+            {
+                MRUKAnchor anchor = keyPair.Key;
+                float totalUsableSurfaceArea = 0f;
+
+                // FIXME: minDistance to edge?
+                var anchorSurfacesList = MRUKExtension.GetAnchorSurfaces(surfaceTypes, _minRadius, anchor, ref totalUsableSurfaceArea);
+                if (anchorSurfacesList.Count == 0)
+                {
+                    Debug.LogWarning($"[{GetType().Name} - {nameof(BuildAnchorsSurfaceDataDictionary)}]: Anchor {anchor.name} does not have surfaces!");
+                    continue;
+                }
+
+                anchorsSurfaceData.Add(key: anchor,
+                    value: new AnchorSurfaceData
+                    {
+                        SurfaceTypes = surfaceTypes,
+                        SurfaceList = anchorSurfacesList,
+                        TotalUsableSurfaceArea = totalUsableSurfaceArea
+                    }
+                );
+            }
+        }
+
+        /// <summary>
+        /// Spawns objects on the current room.
+        /// </summary>
+        [Button]
+        public virtual void SpawnOnGameAnchor()
+        {
+            if (MRUK.Instance && MRUK.Instance.IsInitialized)
+            {
+                var currentRoom = MRUK.Instance.GetCurrentRoom();
+                if (_gameAnchor == null)
+                {
+                    Debug.LogError($"[{GetType().Name}] - ERROR: No GameAnchor defined yet. Please set one before proceeding");
+                    return;
+                }
+
+                SpawnObjectsInGameAnchor(currentRoom, _gameAnchor);
+            }
+            else
+            {
+                Debug.LogWarning($"[{GetType().Name}] - MRUK not initialized yet");
+            }
+        }
+
+        [Button]
+        public virtual void SpawnOnAllAnchors()
+        {
+            if (MRUK.Instance && MRUK.Instance.IsInitialized)
+            {
+                var currentRoom = MRUK.Instance.GetCurrentRoom();
+
+                foreach (var anchorGameObjKeyValuePair in gameAnchorSelection.AnchorPrefabSpawnerObjects)
+                {
+                    SpawnObjectsInGameAnchor(currentRoom, anchorGameObjKeyValuePair.Key);
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"[{GetType().Name}] - MRUK not initialized yet");
+            }
+        }
+
+        /// <summary>
+        /// In case we don't have GameAnchorSelection - we need to set one
+        /// </summary>
+        [Button]
+        public virtual void SetHardcodedGameAnchor()
+        {
+            SetGameAnchor(MRUKExtension.GetClosestAnchorBasedOnSurfacePosition(null, FindFirstObjectByType<Camera>().transform.position));
+        }
+
+        /// <summary>
+        /// Sets the game anchor reference.
+        /// </summary>
+        /// <param name="anchor">Anchor to set.</param>
+        public virtual void SetGameAnchor(MRUKAnchor anchor)
+        {
+            _gameAnchor = anchor;
+        }
+
+        /// <summary>
+        /// Sets the prefab to be spawned and triggers any necessary recalculation.
+        /// </summary>
+        /// <param name="newPrefab">The new prefab to spawn.</param>
+        public virtual void SetNewPrefab(GameObject newPrefab)
+        {
+            SpawnObject = newPrefab;
+            CalculatePrefabBounds();
+            BuildAnchorsSurfaceDataDictionary();
+        }
+
+        /// <summary>
+        /// Sets the spawn amount.
+        /// </summary>
+        /// <param name="newMax">New maximum spawn amount.</param>
+        public virtual void SetSpawnAmount(int newMax)
+        {
+            SpawnAmountPerSurface = newMax;
+        }
+
+
+        /// <summary>
         /// Initializes anchor surfaces if not already done.
         /// </summary>
         /// <param name="surfaceTypes">Type of surfaces to get.</param>
         /// <param name="minDistanceToEdge">Minimum distance to edge.</param>
         /// <param name="anchor">Anchor to get surfaces from.</param>
         /// <returns>True if surfaces were initialized successfully, false otherwise.</returns>
-        private bool InitializeAnchorSurfaces(MRUK.SurfaceType surfaceTypes, float minDistanceToEdge, MRUKAnchor anchor)
+        private bool InitializeAnchorSurfaces(MRUK.SurfaceType surfaceTypes, float minDistanceToEdge, MRUKAnchor anchor, out List<MRUKExtension.Surface> anchorSurfacesList)
         {
-            if (_gameAnchorSurfaces == null)
+            float totalUsableSurfaceArea = 0f;
+            anchorSurfacesList = MRUKExtension.GetAnchorSurfaces(surfaceTypes, minDistanceToEdge, anchor, ref totalUsableSurfaceArea);
+            if (anchorSurfacesList.Count == 0)
             {
-                float totalUsableSurfaceArea = 0f;
-                _gameAnchorSurfaces = MRUKExtension.GetAnchorSurfaces(surfaceTypes, minDistanceToEdge, anchor, ref totalUsableSurfaceArea);
-                if (_gameAnchorSurfaces.Count == 0)
-                {
-                    Debug.LogError($"[{GetType().Name} - {nameof(_gameAnchorSurfaces)}]: Anchor {anchor.name} does not have surfaces!");
-                    return false;
-                }
+                Debug.LogError($"[{GetType().Name} - {nameof(InitializeAnchorSurfaces)}]: Anchor {anchor.name} does not have surfaces!");
+                return false;
             }
             return true;
         }
@@ -280,33 +337,44 @@ namespace ChoreChampion.XR.MRUtilityKit
             position = Vector3.zero;
             normal = Vector3.zero;
 
-            if (!InitializeAnchorSurfaces(surfaceTypes, minDistanceToEdge, anchor))
+            if (!anchorsSurfaceData.ContainsKey(anchor))
             {
                 return false;
             }
+            var surfaceData = anchorsSurfaceData[anchor];
+            var anchorSurfacesList = surfaceData.SurfaceList;
+            var totalUsableSurfaceArea = surfaceData.TotalUsableSurfaceArea;
+
+            /*
+            if (!InitializeAnchorSurfaces(surfaceTypes, minDistanceToEdge, anchor, out var anchorSurfacesList))
+            {
+                return false;
+            }
+            
 
             float totalUsableSurfaceArea = 0f;
-            for (int i = 0; i < _gameAnchorSurfaces.Count; i++)
+            for (int i = 0; i < anchorSurfacesList.Count; i++)
             {
-                totalUsableSurfaceArea += _gameAnchorSurfaces[i].UsableArea;
+                totalUsableSurfaceArea += anchorSurfacesList[i].UsableArea;
             }
+            */
 
             for (int i = 0; i < MaxIterations; ++i)
             {
-                // Pick a random surface weighted by surface area (_gameAnchorSurfaces with a larger
+                // Pick a random surface weighted by surface area (anchorSurfacesList with a larger
                 // area have more chance of being chosen)
                 var rand = UnityEngine.Random.Range(0, totalUsableSurfaceArea);
                 int index = 0;
-                for (; index < _gameAnchorSurfaces.Count - 1; ++index)
+                for (; index < anchorSurfacesList.Count - 1; ++index)
                 {
-                    rand -= _gameAnchorSurfaces[index].UsableArea;
+                    rand -= anchorSurfacesList[index].UsableArea;
                     if (rand <= 0.0f)
                     {
                         break;
                     }
                 }
 
-                var surface = _gameAnchorSurfaces[index];
+                var surface = anchorSurfacesList[index];
                 var bounds = surface.Bounds;
                 Vector2 pos = new Vector2(
                     UnityEngine.Random.Range(bounds.xMin + minDistanceToEdge, bounds.xMax - minDistanceToEdge),
@@ -343,146 +411,164 @@ namespace ChoreChampion.XR.MRUtilityKit
             position = Vector3.zero;
             normal = Vector3.zero;
 
+            if (!anchorsSurfaceData.ContainsKey(anchor))
+            {
+                return false;
+            }
+            var surfaceData = anchorsSurfaceData[anchor];
+            var anchorSurfacesList = surfaceData.SurfaceList;
+            var totalUsableSurfaceArea = surfaceData.TotalUsableSurfaceArea;
+
+            /*
             // FIXME: ignoring minDistanceToEdge right now due to rotation issues ahead
-            if (!InitializeAnchorSurfaces(surfaceTypes, 0f, anchor))
+            if (!InitializeAnchorSurfaces(surfaceTypes, 0f, anchor, out var anchorSurfacesList))
+            {
+                return false;
+            }
+            */
+
+            // TODO: Right now only works on a single surface (the first one). Extend code in the future.
+            // Use the first surface for fixed positioning (or could be made configurable)
+            var surface = anchorSurfacesList[0];
+            var bounds = surface.Bounds;
+
+            // Lerp local position from [-0.5, 0.5] range to bounds coordinates respecting minDistanceToEdge
+            // localPosition.x = -0.5 maps to bounds.xMin + minDistanceToEdge
+            // localPosition.x = 0.5 maps to bounds.xMax - minDistanceToEdge
+            float mappedX = Mathf.Lerp(bounds.xMin + 0f, bounds.xMax - 0f, localPosition.x + 0.5f);
+            float mappedY = Mathf.Lerp(bounds.yMin + 0f, bounds.yMax - 0f, localPosition.y + 0.5f);
+
+            Vector2 mappedPosition = new Vector2(mappedX, mappedY);
+
+            if (surface.IsPlane && !surface.Anchor.IsPositionInBoundary(mappedPosition))
             {
                 return false;
             }
 
-            // Use the first surface for fixed positioning (or could be made configurable)
-            if (_gameAnchorSurfaces.Count > 0)
-            {
-                var surface = _gameAnchorSurfaces[0];
-                var bounds = surface.Bounds;
-
-                // Lerp local position from [-0.5, 0.5] range to bounds coordinates respecting minDistanceToEdge
-                // localPosition.x = -0.5 maps to bounds.xMin + minDistanceToEdge
-                // localPosition.x = 0.5 maps to bounds.xMax - minDistanceToEdge
-                float mappedX = Mathf.Lerp(bounds.xMin + 0f, bounds.xMax - 0f, localPosition.x + 0.5f);
-                float mappedY = Mathf.Lerp(bounds.yMin + 0f, bounds.yMax - 0f, localPosition.y + 0.5f);
-
-                Vector2 mappedPosition = new Vector2(mappedX, mappedY);
-
-                if (surface.IsPlane && !surface.Anchor.IsPositionInBoundary(mappedPosition))
-                {
-                    return false;
-                }
-
-                position = surface.Transform.MultiplyPoint3x4(new Vector3(mappedPosition.x, mappedPosition.y, 0f));
-                normal = surface.Transform.MultiplyVector(Vector3.forward);
-                return true;
-            }
-
-            return false;
+            position = surface.Transform.MultiplyPoint3x4(new Vector3(mappedPosition.x, mappedPosition.y, 0f));
+            normal = surface.Transform.MultiplyVector(Vector3.forward);
+            return true;
         }
 
         /// <summary>
-        /// Called to spawn objects in the anchor. Derived classes must implement this.
+        /// Called to spawn objects in the anchor in each surface selected. Derived classes must implement this.
         /// </summary>
         /// <param name="room">Room context for spawning.</param>
         /// <param name="anchor">Anchor to spawn on.</param>
         /// <returns>True if successful, false otherwise.</returns>
         protected bool SpawnObjectsInGameAnchor(MRUKRoom room, MRUKAnchor anchor)
         {
-            int i = _currentSpawnedObjects;
-            while (i < SpawnAmount)
+            var surfaceList = anchorsSurfaceData[anchor].SurfaceList;
+            for (int surfaceIndex = 0; surfaceIndex < surfaceList.Count; surfaceIndex++)
             {
-                bool foundValidSpawnPosition = false;
-                for (int j = 0; j < MaxIterations; ++j)
+                var surface = surfaceList[surfaceIndex];
+                int i = surface.AmountSpawnedObjects;
+                while (i < SpawnAmountPerSurface)
                 {
-                    Vector3 spawnPosition = Vector3.zero;
-                    Vector3 spawnNormal = Vector3.zero;
-                    if (SpawnLocations == MRUKSpawnLocation.Floating)
+                    bool foundValidSpawnPosition = false;
+                    for (int j = 0; j < MaxIterations; ++j)
                     {
-                        var randomPos = room.GenerateRandomPositionInRoom(_minRadius, true);
-                        if (!randomPos.HasValue)
+                        Vector3 spawnPosition = Vector3.zero;
+                        Vector3 spawnNormal = Vector3.zero;
+                        if (SpawnLocations == MRUKSpawnLocation.Floating)
                         {
-                            break;
-                        }
-
-                        spawnPosition = randomPos.Value;
-                    }
-                    else
-                    {
-                        MRUK.SurfaceType surfaceType = 0;
-                        switch (SpawnLocations)
-                        {
-                            case MRUKSpawnLocation.AnySurface:
-                                surfaceType |= MRUK.SurfaceType.FACING_UP;
-                                surfaceType |= MRUK.SurfaceType.VERTICAL;
-                                surfaceType |= MRUK.SurfaceType.FACING_DOWN;
+                            var randomPos = room.GenerateRandomPositionInRoom(_minRadius, true);
+                            if (!randomPos.HasValue)
+                            {
                                 break;
-                            case MRUKSpawnLocation.VerticalSurfaces:
-                                surfaceType |= MRUK.SurfaceType.VERTICAL;
-                                break;
-                            case MRUKSpawnLocation.OnTopOfSurfaces:
-                                surfaceType |= MRUK.SurfaceType.FACING_UP;
-                                break;
-                            case MRUKSpawnLocation.HangingDown:
-                                surfaceType |= MRUK.SurfaceType.FACING_DOWN;
-                                break;
-                        }
+                            }
 
-                        if (!CalculateSpawnPositionAndNormal(surfaceType, anchor, out spawnPosition, out spawnNormal, j))
+                            spawnPosition = randomPos.Value;
+                        }
+                        else
                         {
-                            continue;
+                            MRUK.SurfaceType surfaceType = GetSurfaceTypes();
+
+                            if (!CalculateSpawnPositionAndNormal(surfaceType, anchor, out spawnPosition, out spawnNormal, j))
+                            {
+                                continue;
+                            }
+
+                            var center = spawnPosition + spawnNormal * _centerOffset;
+                            //Debug.Log($"Spawn - Position: {spawnPosition}, Normal: {spawnNormal}, Center: {center}");
+                            //Debug.Log($"Prefab - Bounds: {_prefabBounds}, adjusted: {_adjustedBounds}, base offset: {_baseOffset}");
+                            if (!room.IsPositionInRoom(center))
+                            {
+                                //Debug.Log($"Spawn CONTINUE ITERATION - Not in room");
+                                continue;
+                            }
+
+                            if (room.IsPositionInSceneVolume(center))
+                            {
+                                //Debug.Log($"Spawn CONTINUE ITERATION - InSceneVolume");
+                                continue;
+                            }
+
+                            if (room.Raycast(new Ray(spawnPosition - spawnNormal * _baseOffset, spawnNormal), SurfaceClearanceDistance, out _))
+                            {
+                                //Debug.Log($"Spawn CONTINUE ITERATION - Raycast thing");
+                                continue;
+                            }
                         }
 
-                        var center = spawnPosition + spawnNormal * _centerOffset;
-                        //Debug.Log($"Spawn - Position: {spawnPosition}, Normal: {spawnNormal}, Center: {center}");
-                        //Debug.Log($"Prefab - Bounds: {_prefabBounds}, adjusted: {_adjustedBounds}, base offset: {_baseOffset}");
-                        if (!room.IsPositionInRoom(center))
+                        // Calculate world rotation based on surface normal
+                        Quaternion spawnRotation = Quaternion.FromToRotation(Vector3.up, spawnNormal);
+
+                        if (CheckOverlaps && _prefabBounds.HasValue)
                         {
-                            //Debug.Log($"Spawn CONTINUE ITERATION - Not in room");
-                            continue;
+                            if (Physics.CheckBox(spawnPosition + spawnRotation * _adjustedBounds.center, _adjustedBounds.extents, spawnRotation, LayerMask, QueryTriggerInteraction.Ignore))
+                            {
+                                continue;
+                            }
                         }
 
-                        if (room.IsPositionInSceneVolume(center))
+                        foundValidSpawnPosition = true;
+
+                        bool shouldContinue = InstantiateOrMoveObject(anchor, spawnPosition, spawnRotation);
+                        if (!shouldContinue)
                         {
-                            //Debug.Log($"Spawn CONTINUE ITERATION - InSceneVolume");
-                            continue;
+                            return false;
                         }
 
-                        if (room.Raycast(new Ray(spawnPosition - spawnNormal * _baseOffset, spawnNormal), SurfaceClearanceDistance, out _))
-                        {
-                            //Debug.Log($"Spawn CONTINUE ITERATION - Raycast thing");
-                            continue;
-                        }
-                    }
-
-                    // Calculate world rotation based on surface normal
-                    Quaternion spawnRotation = Quaternion.FromToRotation(Vector3.up, spawnNormal);
-
-                    if (CheckOverlaps && _prefabBounds.HasValue)
-                    {
-                        if (Physics.CheckBox(spawnPosition + spawnRotation * _adjustedBounds.center, _adjustedBounds.extents, spawnRotation, LayerMask, QueryTriggerInteraction.Ignore))
-                        {
-                            continue;
-                        }
+                        break;
                     }
 
-                    foundValidSpawnPosition = true;
-
-                    bool shouldContinue = InstantiateOrMoveObject(spawnPosition, spawnRotation);
-                    if (!shouldContinue)
+                    if (!foundValidSpawnPosition)
                     {
-                        return false;
+                        Debug.LogWarning($"Failed to find valid spawn position after {MaxIterations} iterations. Only spawned {i} prefabs instead of {SpawnAmountPerSurface}.");
+                        break;
                     }
 
-                    break;
+                    ++i;
                 }
-
-                if (!foundValidSpawnPosition)
-                {
-                    Debug.LogWarning($"Failed to find valid spawn position after {MaxIterations} iterations. Only spawned {i} prefabs instead of {SpawnAmount}.");
-                    break;
-                }
-
-                ++i;
+                surface.AmountSpawnedObjects = i;
             }
-            _currentSpawnedObjects = i;
 
             return true;
+        }
+
+        protected MRUK.SurfaceType GetSurfaceTypes()
+        {
+            MRUK.SurfaceType surfaceType = 0;
+            switch (SpawnLocations)
+            {
+                case MRUKSpawnLocation.AnySurface:
+                    surfaceType |= MRUK.SurfaceType.FACING_UP;
+                    surfaceType |= MRUK.SurfaceType.VERTICAL;
+                    surfaceType |= MRUK.SurfaceType.FACING_DOWN;
+                    break;
+                case MRUKSpawnLocation.VerticalSurfaces:
+                    surfaceType |= MRUK.SurfaceType.VERTICAL;
+                    break;
+                case MRUKSpawnLocation.OnTopOfSurfaces:
+                    surfaceType |= MRUK.SurfaceType.FACING_UP;
+                    break;
+                case MRUKSpawnLocation.HangingDown:
+                    surfaceType |= MRUK.SurfaceType.FACING_DOWN;
+                    break;
+            }
+
+            return surfaceType;
         }
 
         /// <summary>
@@ -502,12 +588,12 @@ namespace ChoreChampion.XR.MRUtilityKit
         /// <param name="spawnPosition">Position to spawn at.</param>
         /// <param name="spawnRotation">Rotation to spawn with.</param>
         /// <returns>True to continue spawning, false to stop (for moving existing objects).</returns>
-        protected virtual bool InstantiateOrMoveObject(Vector3 spawnPosition, Quaternion spawnRotation)
+        protected virtual bool InstantiateOrMoveObject(MRUKAnchor anchor, Vector3 spawnPosition, Quaternion spawnRotation)
         {
             if (SpawnObject.gameObject.scene.path == null)
             {
                 // Instantiate new object
-                Transform parentTransform = parentToAnchor ? GetAnchorGameObjectTransform() : transform;
+                Transform parentTransform = parentToAnchor ? GetAnchorGameObjectTransform(anchor) : transform;
                 GameObject spawnedObject = Instantiate(SpawnObject, spawnPosition, spawnRotation, parentTransform);
 
                 // When parenting to anchor, set local rotation to identity (inherits anchor's rotation)
@@ -529,7 +615,7 @@ namespace ChoreChampion.XR.MRUtilityKit
                 // Move existing object
                 if (parentToAnchor)
                 {
-                    SpawnObject.transform.SetParent(GetAnchorGameObjectTransform());
+                    SpawnObject.transform.SetParent(GetAnchorGameObjectTransform(anchor));
                     SpawnObject.transform.localRotation = RoundRotationToNearest90Degrees(SpawnObject.transform.localRotation);
                 }
                 else
@@ -548,13 +634,13 @@ namespace ChoreChampion.XR.MRUtilityKit
 
                 return false; // ignore SpawnAmount once we have a successful move of existing object in the scene
             }
+        }
 
-            Transform GetAnchorGameObjectTransform()
-            {
-                var anchorGameObject = gameAnchorSelection.AnchorPrefabSpawnerObjects[_gameAnchor];
-                var parentIdentifier = anchorGameObject.GetComponentInChildren<RuntimeSpawnObjectsParentIdentifier>();
-                return parentIdentifier.transform ?? anchorGameObject.transform;
-            }
+        protected Transform GetAnchorGameObjectTransform(MRUKAnchor anchor)
+        {
+            var anchorGameObject = gameAnchorSelection.AnchorPrefabSpawnerObjects[anchor];
+            var parentIdentifier = anchorGameObject.GetComponentInChildren<RuntimeSpawnObjectsParentIdentifier>();
+            return parentIdentifier.transform ?? anchorGameObject.transform;
         }
 
         /// <summary>

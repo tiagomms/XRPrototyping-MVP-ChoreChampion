@@ -30,6 +30,9 @@ namespace ChoreChampion.XR.MRUtilityKit
             public bool IsPlane;
             public Rect Bounds;
             public Matrix4x4 Transform;
+
+            // BONUS: Great for spawning objects on surfaces
+            public int AmountSpawnedObjects;
         }
 
         /// <summary>

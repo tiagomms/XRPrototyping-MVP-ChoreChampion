@@ -14,7 +14,7 @@ namespace ChoreChampion.XR.MRUtilityKit
         {
             base.OnValidate();
             // Force single object placement
-            SpawnAmount = 1;
+            SpawnAmountPerSurface = 1;
             // Force parenting and stretching
             parentToAnchor = true;
             allowStretch = true;
@@ -29,6 +29,36 @@ namespace ChoreChampion.XR.MRUtilityKit
                 Vector2 firstValue = fixedLocalPositions.FirstOrDefault();
                 fixedLocalPositions.Clear();
                 fixedLocalPositions.Add(firstValue);
+            }
+        }
+
+        /// <summary>
+        /// Every anchor that may use this - needs the list of surfaces where objects may spawn and the toal usable surface area (for random spawns)
+        /// </summary>
+        protected override void BuildAnchorsSurfaceDataDictionary()
+        {
+            anchorsSurfaceData = new();
+
+            foreach (var keyPair in gameAnchorSelection.AnchorPrefabSpawnerObjects)
+            {
+                MRUKAnchor anchor = keyPair.Key;
+                float totalUsableSurfaceArea = 0f;
+
+                // FIXME: minDistance to edge => issue on stretching - if you stretch there is no minDistance to edge
+                var anchorSurfacesList = MRUKExtension.GetAnchorSurfaces(GetSurfaceTypes(), 0f, anchor, ref totalUsableSurfaceArea);
+                if (anchorSurfacesList.Count == 0)
+                {
+                    Debug.LogWarning($"[{GetType().Name} - {nameof(BuildAnchorsSurfaceDataDictionary)}]: Anchor {anchor.name} does not have surfaces!");
+                    continue;
+                }
+
+                anchorsSurfaceData.Add(key: anchor,
+                    value: new AnchorSurfaceData
+                    {
+                        SurfaceList = anchorSurfacesList,
+                        TotalUsableSurfaceArea = totalUsableSurfaceArea
+                    }
+                );
             }
         }
     }
