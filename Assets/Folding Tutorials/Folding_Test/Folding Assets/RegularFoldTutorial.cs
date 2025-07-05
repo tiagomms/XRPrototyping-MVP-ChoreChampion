@@ -1,84 +1,119 @@
 using Oculus.Interaction;
 using UnityEngine;
-using System.Collections;
+using System;
 
-/// <summary>
-/// Plays a clip + VFX the moment a SnapInteractor reaches Select state,
-/// then hides this helper once the effects finish.
-/// </summary>
 [RequireComponent(typeof(AudioSource))]
 public class RegularFoldTutorial : MonoBehaviour
 {
-    [Tooltip("SnapInteractor (socket) that receives the object.")]
-    [SerializeField] private SnapInteractor snapInteractor;
+    [Header("Prefabs & Spawn")]
+    [Tooltip("Interactable stencil + T-shirt prefab (face-down)")]
+    [SerializeField] private GameObject interactablePrefab;
+    [Tooltip("Non-interactable T-shirt prefab with Animator")]
+    [SerializeField] private GameObject nonInteractablePrefab;
+    [Tooltip("Where to spawn both variants")]
+    [SerializeField] private Transform spawnPoint;
 
-    [Tooltip("AudioSource with the snap-in clip.")]
-    [SerializeField] private AudioSource audioSource;
+    [Header("Steps")]
+    [Tooltip("One SnapInteractor per fold step (in order)")]
+    [SerializeField] private SnapInteractor[] snapInteractors;
+    [Tooltip("Animation trigger names for each step")]
+    [SerializeField] private string[] animationTriggers;
+    [Tooltip("Audio clips for each step (must match count)")]
+    [SerializeField] private AudioClip[] stepClips;
+    [Tooltip("VFX (optional) for each step)")]
+    [SerializeField] private ParticleSystem[] stepVFX;
 
-    [Tooltip("ParticleSystem to play on snap-in.")]
-    [SerializeField] private ParticleSystem snapVFX;
+    [Header("Outro")]
+    [Tooltip("Audio clip to play when tutorial is done")]
+    [SerializeField] private AudioClip outroClip;
 
-    /* ─────────────────────────────────────────────── */
+    private AudioSource audioSource;
+    private Animator animator;
+    private GameObject interactableInstance;
+    private GameObject nonInteractableInstance;
+    private int currentStep = -1;
+
     void Awake()
     {
-        if (audioSource == null)
-            audioSource = GetComponent<AudioSource>();
+        audioSource = GetComponent<AudioSource>();
+
+        // Spawn the interactable face-down variant
+        interactableInstance = Instantiate(
+            interactablePrefab,
+            spawnPoint.position,
+            spawnPoint.rotation,
+            spawnPoint
+        );
+
+        // Spawn the non-interactable animated variant, but keep it hidden
+        nonInteractableInstance = Instantiate(
+            nonInteractablePrefab,
+            spawnPoint.position,
+            spawnPoint.rotation,
+            spawnPoint
+        );
+        nonInteractableInstance.SetActive(false);
+
+        animator = nonInteractableInstance.GetComponent<Animator>();
     }
 
-    void OnEnable()
-    {
-        if (snapInteractor != null)
-            snapInteractor.WhenStateChanged += OnStateChanged;
-    }
-
-    void OnDisable()
-    {
-        if (snapInteractor != null)
-            snapInteractor.WhenStateChanged -= OnStateChanged;
-    }
-
-    /* ─────────────────────────────────────────────── */
-    private void OnStateChanged(InteractorStateChangeArgs args)
-    {
-        // Fire only when the interactor moves INTO the Select state
-        if (args.NewState == InteractorState.Select)
-            HandleSnap();
-    }
-
-    void HandleSnap()
-    {
-        if (audioSource) audioSource.Play();
-        if (snapVFX)     snapVFX.Play();
-
-        StartCoroutine(DisappearAfterEffects());
-    }
-
-    IEnumerator DisappearAfterEffects()
-    {
-        float audioLen = (audioSource && audioSource.clip) ? audioSource.clip.length : 0f;
-
-        float particleLen = 0f;
-        if (snapVFX)
-        {
-            var main = snapVFX.main;
-            particleLen = main.duration + main.startLifetime.constantMax;
-        }
-
-        yield return new WaitForSeconds(Mathf.Max(audioLen, particleLen));
-        gameObject.SetActive(false);           // or Destroy(gameObject);
-    }
-
+    /// <summary>
+    /// Call this (e.g. via UI Button OnClick) to swap to animated T-shirt and begin step 1.
+    /// </summary>
     public void StartFoldingTutorial()
     {
-        // disable overlay grab transform
-        var child = transform.Find("FlatTshirtFinal");
-        if (child != null)
-            child.GetComponent<GrabFreeTransformer>().enabled = false;
-        else
-            Debug.LogError("FlatTshirtFinal not found!");
+        if (interactableInstance != null)
+            Destroy(interactableInstance);
 
-
+        nonInteractableInstance.SetActive(true);
+        AdvanceStep();
     }
-    
-    
+
+    private void AdvanceStep()
+    {
+        // Unsubscribe from previous step's snap event
+        if (currentStep >= 0 && currentStep < snapInteractors.Length)
+            snapInteractors[currentStep].WhenStateChanged -= OnSnap;
+
+        currentStep++;
+
+        if (currentStep < snapInteractors.Length)
+        {
+            // Trigger this step's animation
+            animator.SetTrigger(animationTriggers[currentStep]);
+
+            // Play this step's audio
+            audioSource.clip = stepClips[currentStep];
+            audioSource.Play();
+
+            // Play VFX if assigned
+            if (stepVFX != null &&
+                currentStep < stepVFX.Length &&
+                stepVFX[currentStep] != null)
+            {
+                stepVFX[currentStep].Play();
+            }
+
+            // Wait for the player to snap into the next socket
+            snapInteractors[currentStep].WhenStateChanged += OnSnap;
+        }
+        else
+        {
+            EndTutorial();
+        }
+    }
+
+    private void OnSnap(InteractorStateChangeArgs args)
+    {
+        if (args.NewState == InteractorState.Select)
+            AdvanceStep();
+    }
+
+    private void EndTutorial()
+    {
+        audioSource.clip = outroClip;
+        audioSource.Play();
+        // Clean up the whole tutorial after outro finishes
+        Destroy(gameObject, outroClip.length + 0.1f);
+    }
 }
