@@ -7,7 +7,7 @@ using System.Collections;
 /// then hides this helper once the effects finish.
 /// </summary>
 [RequireComponent(typeof(AudioSource))]
-public class FoldingTutorial : MonoBehaviour
+public class RegularFoldTutorial : MonoBehaviour
 {
     [Tooltip("SnapInteractor (socket) that receives the object.")]
     [SerializeField] private SnapInteractor snapInteractor;
@@ -67,4 +67,18 @@ public class FoldingTutorial : MonoBehaviour
         yield return new WaitForSeconds(Mathf.Max(audioLen, particleLen));
         gameObject.SetActive(false);           // or Destroy(gameObject);
     }
+
+    public void StartFoldingTutorial()
+    {
+        // disable overlay grab transform
+        var child = transform.Find("FlatTshirtFinal");
+        if (child != null)
+            child.GetComponent<GrabFreeTransformer>().enabled = false;
+        else
+            Debug.LogError("FlatTshirtFinal not found!");
+
+
+    }
+    
+    
 }
