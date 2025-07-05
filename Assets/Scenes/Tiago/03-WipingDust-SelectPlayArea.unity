@@ -16083,6 +16083,69 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2041377167}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1409004864
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1409004866}
+  - component: {fileID: 1409004867}
+  m_Layer: 0
+  m_Name: Single and Stretch Spawn Positions On Anchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1409004866
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1409004864}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1409004867
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1409004864}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5db3fbf2947a92440b8269afc83c1dd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameAnchorSelection: {fileID: 1092795428}
+  _gameAnchor: {fileID: 0}
+  SpawnOnStart: 1
+  SpawnObject: {fileID: 6599131453534862029, guid: 37e11dd5f0a489e42962d2a179e4d4ef, type: 3}
+  SpawnAmount: 1
+  MaxIterations: 10
+  SpawnLocations: 3
+  CheckOverlaps: 0
+  OverrideBounds: -1
+  LayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  SurfaceClearanceDistance: 0.1
+  parentToAnchor: 1
+  allowStretch: 1
+  fixedLocalPositions:
+  - {x: 0, y: 0}
+  shufflePositions: 0
+  incrementalOffsetPerIteration: 0.002
 --- !u!1 &1415188360
 GameObject:
   m_ObjectHideFlags: 0
@@ -18322,6 +18385,76 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 24354889}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1590677094
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1590677097}
+  - component: {fileID: 1590677095}
+  m_Layer: 0
+  m_Name: Fixed Spawn Positions On Anchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1590677095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1590677094}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d839e2a287d6404eb91cf72874aa041, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameAnchorSelection: {fileID: 1092795428}
+  _gameAnchor: {fileID: 0}
+  SpawnOnStart: 1
+  SpawnObject: {fileID: 8240749116634132180, guid: 52bbf2140d10f5e4abc37fd8f05e243f, type: 3}
+  SpawnAmount: 8
+  MaxIterations: 10
+  SpawnLocations: 3
+  CheckOverlaps: 0
+  OverrideBounds: -1
+  LayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  SurfaceClearanceDistance: 0.1
+  parentToAnchor: 0
+  allowStretch: 0
+  fixedLocalPositions:
+  - {x: 0.1, y: 0.1}
+  - {x: 0.2, y: 0.2}
+  - {x: 0.3, y: 0.3}
+  - {x: 0.4, y: 0.4}
+  - {x: -0.1, y: -0.1}
+  - {x: -0.2, y: -0.2}
+  - {x: -0.3, y: -0.3}
+  - {x: -0.4, y: -0.4}
+  shufflePositions: 0
+  incrementalOffsetPerIteration: 0.002
+--- !u!4 &1590677097
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1590677094}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1594391654
 GameObject:
@@ -25715,7 +25848,7 @@ GameObject:
   - component: {fileID: 2111625132}
   - component: {fileID: 2111625131}
   m_Layer: 0
-  m_Name: Spawn Positions On Anchor
+  m_Name: Random Spawn Positions On Anchor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -25737,7 +25870,7 @@ MonoBehaviour:
   _gameAnchor: {fileID: 0}
   SpawnOnStart: 1
   SpawnObject: {fileID: 8240749116634132180, guid: 52bbf2140d10f5e4abc37fd8f05e243f, type: 3}
-  SpawnAmount: 10000
+  SpawnAmount: 3
   MaxIterations: 1000
   SpawnLocations: 3
   CheckOverlaps: 1
@@ -25746,6 +25879,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 55
   SurfaceClearanceDistance: 0.2
+  parentToAnchor: 0
+  allowStretch: 0
 --- !u!4 &2111625132
 Transform:
   m_ObjectHideFlags: 0
@@ -26255,6 +26390,8 @@ SceneRoots:
   - {fileID: 1660204411}
   - {fileID: 2049416539}
   - {fileID: 1092795429}
+  - {fileID: 1590677097}
   - {fileID: 2111625132}
+  - {fileID: 1409004866}
   - {fileID: 222509713}
   - {fileID: 82834488}
