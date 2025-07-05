@@ -128,7 +128,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 60359702}
-  - component: {fileID: 60359701}
+  - component: {fileID: 60359703}
   m_Layer: 0
   m_Name: ClothingAnalyzer
   m_TagString: Untagged
@@ -136,24 +136,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
---- !u!114 &60359701
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 60359700}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a3340a21832dc4dc68799cbb0ad02cf3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  apiKey: AIzaSyBsNH5KzIYezhPcLMA8Gps8rAyiLzWwaYs
-  apiUrl: https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent
-  currentAnalyzeMode: 1
-  testImage: {fileID: 2800000, guid: 71dca54da63e66641b7e720a320ec554, type: 3}
-  webCamTextureManager: {fileID: 1373946501}
-  <CurrentAnalysis>k__BackingField: {}
 --- !u!4 &60359702
 Transform:
   m_ObjectHideFlags: 0
@@ -169,6 +151,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &60359703
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 60359700}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3a22644b2ef7ff498a9771235c65f9d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  apiKey: YOUR_API_KEY_HERE
+  currentAnalyzeMode: 0
+  testImage: {fileID: 0}
+  webCamTextureManager: {fileID: 0}
 --- !u!1001 &91842641
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1179,8 +1177,8 @@ GameObject:
   - component: {fileID: 1943082302}
   - component: {fileID: 1943082301}
   - component: {fileID: 1943082300}
-  - component: {fileID: 1943082299}
   - component: {fileID: 1943082298}
+  - component: {fileID: 1943082305}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -1285,19 +1283,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &1943082299
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1943082297}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 33065060162c04840bea97cd39a6e264, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  triggerSound: {fileID: 1943082298}
 --- !u!54 &1943082300
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1414,6 +1399,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1943082305
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1943082297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec8acf99e13592349aa799a29fba195a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  triggerSound: {fileID: 1943082298}
 --- !u!1001 &1019656467722773290
 PrefabInstance:
   m_ObjectHideFlags: 0
