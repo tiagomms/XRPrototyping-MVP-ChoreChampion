@@ -11,6 +11,13 @@ namespace PassthroughCameraSamples.MultiObjectDetection
     [MetaCodeSample("PassthroughCameraApiSamples-MultiObjectDetection")]
     public class SentisInferenceRunManager : MonoBehaviour
     {
+        public enum ExpectedOutput
+        {
+            BoxesOnly = 0,
+            PrefabsOnly = 1,
+            BoxesAndPrefab = 2
+        }
+
         [Header("Sentis Model config")]
         [SerializeField] protected Vector2Int m_inputSize = new(640, 640);
         [SerializeField] protected BackendType m_backend = BackendType.CPU;
@@ -18,6 +25,8 @@ namespace PassthroughCameraSamples.MultiObjectDetection
         [SerializeField] protected int m_layersPerFrame = 25;
         [SerializeField] protected TextAsset m_labelsAsset;
         public bool IsModelLoaded { get; protected set; } = false;
+
+        [SerializeField] protected ExpectedOutput expectedOutput;
 
         [Header("UI display references")]
         [SerializeField] private SentisInferenceUiManager m_uiInference;
@@ -238,8 +247,18 @@ namespace PassthroughCameraSamples.MultiObjectDetection
                     }
                     break;
                 case 3:
-                    // NOTE: stage 3 - where I need to filter and send to accurate ui box
-                    m_uiInference.DrawUIBoxes(m_output, m_labelIDs, m_inputSize.x, m_inputSize.y);
+                    // NOTE: stage 3 - where I need to get the bounding boxes data
+                    // TODO: Test: if there are improvements in making the m_isWaiting cycle between Building the dataset and then spawning things
+
+                    m_uiInference.BuildBoundingBoxes(m_output, m_labelIDs, m_inputSize.x, m_inputSize.y);
+                    if (expectedOutput == ExpectedOutput.BoxesOnly || expectedOutput == ExpectedOutput.BoxesAndPrefab)
+                    {                    
+                        m_uiInference.DrawBoundingBoxes();
+                    }
+                    if (expectedOutput == ExpectedOutput.PrefabsOnly || expectedOutput == ExpectedOutput.BoxesAndPrefab)
+                    {                    
+                        m_uiInference.DrawPrefabs();
+                    }
                     m_download_state = 5;
                     break;
                 case 4:

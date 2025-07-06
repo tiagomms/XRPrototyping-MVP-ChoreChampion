@@ -159,7 +159,7 @@ namespace PassthroughCameraSamples.MultiObjectDetection
         private void SpwanCurrentDetectedObjects()
         {
             var count = 0;
-            foreach (var box in m_uiInference.BoxDrawn)
+            foreach (var box in m_uiInference.CurrentBoundingBoxList)
             {
                 if (PlaceMarkerUsingEnvironmentRaycast(box.WorldPos, box.ClassName))
                 {
