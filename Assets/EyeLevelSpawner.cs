@@ -30,6 +30,9 @@ public class EyeLevelSpawner : MonoBehaviour
     [Tooltip("Drag your RegularFoldTutorial here")]
     [SerializeField] private RegularFoldTutorial tutorial;
 
+    private List<GameObject> spawnedObjects = new List<GameObject>();
+    private bool hasSpawned = false;
+
     void Start()
     {
         if (UserTransform == null)
@@ -46,22 +49,73 @@ public class EyeLevelSpawner : MonoBehaviour
             return;
         }
 
-        MRUK.Instance.RegisterSceneLoadedCallback(() =>
+        // Check if scene is already loaded
+        if (MRUK.Instance.IsInitialized)
         {
-            if (SpawnOnStart == MRUK.RoomFilter.AllRooms)
-                foreach (var room in MRUK.Instance.Rooms)
-                    SpawnInRoom(room);
+            SpawnObjects();
+        }
+        else
+        {
+            MRUK.Instance.RegisterSceneLoadedCallback(() =>
+            {
+                SpawnObjects();
+            });
+        }
+    }
+
+    private void SpawnObjects()
+    {
+        if (hasSpawned)
+        {
+            Debug.LogWarning("EyeLevelSpawner: Objects already spawned, skipping duplicate spawn");
+            return;
+        }
+
+        if (SpawnOnStart == MRUK.RoomFilter.AllRooms)
+        {
+            foreach (var room in MRUK.Instance.Rooms)
+            {
+                SpawnInRoom(room);
+            }
+        }
+        else
+        {
+            var currentRoom = MRUK.Instance.GetCurrentRoom();
+            if (currentRoom != null)
+            {
+                SpawnInRoom(currentRoom);
+            }
             else
-                SpawnInRoom(MRUK.Instance.GetCurrentRoom());
-        });
+            {
+                Debug.LogWarning("No current room found for spawning");
+            }
+        }
+
+        hasSpawned = true;
     }
 
     private void SpawnInRoom(MRUKRoom room)
     {
-        if (room == null) return;
+        if (room == null) 
+        {
+            Debug.LogWarning("Room is null, skipping spawn");
+            return;
+        }
+
+        if (Prefabs == null || Prefabs.Count == 0)
+        {
+            Debug.LogWarning("No prefabs assigned to spawn");
+            return;
+        }
+
         foreach (var prefab in Prefabs)
         {
-            if (prefab == null || prefab.scene.IsValid()) continue;
+            if (prefab == null) 
+            {
+                Debug.LogWarning("Null prefab found in prefabs list, skipping");
+                continue;
+            }
+            
             SpawnPrefabsAtEyeLevel(room, prefab);
         }
     }
@@ -72,6 +126,8 @@ public class EyeLevelSpawner : MonoBehaviour
         float objectRadius = bounds.HasValue
             ? Mathf.Max(bounds.Value.extents.x, bounds.Value.extents.z)
             : 0.1f;
+
+        int successfulSpawns = 0;
 
         for (int n = 0; n < SpawnAmount; n++)
         {
@@ -92,24 +148,49 @@ public class EyeLevelSpawner : MonoBehaviour
                 var spawned = Instantiate(prefab, pos, rot, transform);
                 FaceUser(spawned.transform, pos);
 
+                // Track spawned objects
+                spawnedObjects.Add(spawned);
+
+                // Clear selection to prevent Inspector issues
+                #if UNITY_EDITOR
+                if (UnityEditor.Selection.activeGameObject == spawned)
+                    UnityEditor.Selection.activeGameObject = null;
+                #endif
+
+                // Register with tutorial - but only register the LAST spawned object
+                // This prevents multiple registrations which could cause issues
                 if (tutorial != null)
+                {
                     tutorial.RegisterInteractable(spawned);
+                    Debug.Log($"Registered {spawned.name} with tutorial");
+                }
                 else
-                    Debug.LogError("EyeLevelSpawner: RegularFoldTutorial reference is missing!");
+                {
+                    Debug.LogWarning("EyeLevelSpawner: RegularFoldTutorial reference is missing! Objects spawned but not registered with tutorial.");
+                }
 
                 placed = true;
+                successfulSpawns++;
                 break;
             }
 
             if (!placed)
                 Debug.LogWarning($"{name}: Couldn't place {prefab.name} after {MaxIterations} attempts");
         }
+
+        Debug.Log($"Successfully spawned {successfulSpawns} out of {SpawnAmount} {prefab.name} objects");
     }
 
     private bool TryGetEyeLevelPosition(MRUKRoom room, float objectRadius, out Vector3 position, out Quaternion rotation)
     {
         position = Vector3.zero;
         rotation = Quaternion.identity;
+
+        if (UserTransform == null)
+        {
+            Debug.LogError("UserTransform is null in TryGetEyeLevelPosition");
+            return false;
+        }
 
         Vector3 up      = UserTransform.up;
         Vector3 forward = UserTransform.forward;
@@ -138,6 +219,8 @@ public class EyeLevelSpawner : MonoBehaviour
 
     private void FaceUser(Transform t, Vector3 pos)
     {
+        if (t == null || UserTransform == null) return;
+        
         var dir = (UserTransform.position - pos).normalized;
         t.rotation = Quaternion.LookRotation(dir, Vector3.up);
     }
@@ -148,8 +231,77 @@ public class EyeLevelSpawner : MonoBehaviour
     public void OnStartTutorialButton()
     {
         if (tutorial != null)
+        {
             tutorial.StartFoldingTutorial();
+        }
         else
+        {
             Debug.LogError("No RegularFoldTutorial assigned for OnStartTutorialButton()");
+        }
+    }
+
+    /// <summary>
+    /// Manually trigger spawning (useful for testing)
+    /// </summary>
+    [ContextMenu("Spawn Objects")]
+    public void ManualSpawn()
+    {
+        if (MRUK.Instance != null && MRUK.Instance.IsInitialized)
+        {
+            // Reset spawn state to allow manual respawning
+            hasSpawned = false;
+            SpawnObjects();
+        }
+        else
+        {
+            Debug.LogError("MRUK is not initialized. Cannot spawn objects.");
+        }
+    }
+
+    /// <summary>
+    /// Clear all spawned objects
+    /// </summary>
+    [ContextMenu("Clear Spawned Objects")]
+    public void ClearSpawnedObjects()
+    {
+        #if UNITY_EDITOR
+        // Clear selection to avoid inspector errors
+        UnityEditor.Selection.activeGameObject = null;
+        #endif
+        
+        foreach (var obj in spawnedObjects)
+        {
+            if (obj != null)
+            {
+                #if UNITY_EDITOR
+                if (UnityEditor.Selection.activeGameObject == obj)
+                    UnityEditor.Selection.activeGameObject = null;
+                #endif
+                
+                if (Application.isPlaying)
+                    Destroy(obj);
+                else
+                    DestroyImmediate(obj);
+            }
+        }
+        
+        spawnedObjects.Clear();
+        hasSpawned = false;
+        Debug.Log("Cleared all spawned objects");
+    }
+
+    /// <summary>
+    /// Reset spawner state without destroying objects
+    /// </summary>
+    public void ResetSpawner()
+    {
+        hasSpawned = false;
+        spawnedObjects.Clear();
+    }
+
+    private void OnDestroy()
+    {
+        // Clean up tracked objects
+        spawnedObjects.Clear();
     }
 }
