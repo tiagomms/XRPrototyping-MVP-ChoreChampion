@@ -58,11 +58,6 @@ namespace PassthroughCameraSamples.MultiObjectDetection
             public string ClassName;
         }
 
-        protected virtual void OnValidate() 
-        {
-            m_detectionPrefabManager = GetComponent<DetectionPrefabManager>();    
-        }
-
         #region Unity Functions
         protected virtual void Start()
         {
