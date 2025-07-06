@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ChoreChampion.XR.MRUtilityKit;
+using System.Linq.Expressions;
+using Meta.XR.MRUtilityKit;
 using Meta.XR.Util;
 using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Meta.XR.MRUtilityKit
+namespace ChoreChampion.XR.MRUtilityKit
 {
     /// <summary>
     /// Allows for fast generation of valid (inside the room, outside furniture bounds) random positions for content spawning.
@@ -38,6 +39,7 @@ namespace Meta.XR.MRUtilityKit
 
         private bool _areAnchorsVisible = false;
 
+        public UnityEvent onCompleteSpawnPrefabs;
         public UnityEvent<MRUKAnchor> onSelectGameAnchor;
         // We want to initialize the spawner in the current room, but we don't want to spawn anything yet.
         // So we disable the anchor prefab spawner.
@@ -71,10 +73,12 @@ namespace Meta.XR.MRUtilityKit
                     case MRUK.RoomFilter.CurrentRoomOnly:
                         SpawnPrefabs(MRUK.Instance.GetCurrentRoom());
                         ToggleMrukAnchorsVisibility();
+                        onCompleteSpawnPrefabs.Invoke();
                         break;
                     case MRUK.RoomFilter.AllRooms:
                         SpawnPrefabs();
                         ToggleMrukAnchorsVisibility();
+                        onCompleteSpawnPrefabs.Invoke();
                         break;
                     case MRUK.RoomFilter.None:
                         break;
@@ -88,8 +92,12 @@ namespace Meta.XR.MRUtilityKit
         public void SetDefaultGameAnchor()
         {
             // TODO: Right now I will set up the code from the closest anchor of type X to test, if not null
-            GameAnchor = MRUKExtension.GetClosestAnchorBasedOnSurfacePosition(EligibleGameAnchorLabels, cameraTransform.position);
+            SetGameAnchor(MRUKExtension.GetClosestAnchorBasedOnSurfacePosition(EligibleGameAnchorLabels, cameraTransform.position));
+        }
 
+        public void SetGameAnchor(MRUKAnchor newGameAnchor)
+        {
+            GameAnchor = newGameAnchor;
             onSelectGameAnchor.Invoke(GameAnchor);
         }
 

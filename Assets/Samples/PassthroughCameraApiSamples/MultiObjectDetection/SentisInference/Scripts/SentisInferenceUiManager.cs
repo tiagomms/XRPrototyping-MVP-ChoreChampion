@@ -17,6 +17,9 @@ namespace PassthroughCameraSamples.MultiObjectDetection
         [SerializeField] protected WebCamTextureManager m_webCamTextureManager;
         protected PassthroughCameraEye CameraEye => m_webCamTextureManager.Eye;
 
+        [Header("Prefab display references")]
+        [SerializeField] protected DetectionPrefabManager m_detectionPrefabManager;
+        
         [Header("UI display references")]
         [SerializeField] protected SentisObjectDetectedUiManager m_detectionCanvas;
         [SerializeField] protected RawImage m_displayImage;
@@ -35,7 +38,7 @@ namespace PassthroughCameraSamples.MultiObjectDetection
         [SerializeField] protected TestImageManager testImageManager;
         [SerializeField] protected Camera debugCamera;
 
-        public List<BoundingBox> BoxDrawn = new();
+        public List<BoundingBox> CurrentBoundingBoxList = new();
 
         protected string[] m_labels;
         protected List<GameObject> m_boxPool = new();
@@ -44,11 +47,13 @@ namespace PassthroughCameraSamples.MultiObjectDetection
         //base bounding box implementation
         public struct BoundingBox
         {
+            public int Id; // added Id (n) for label identification
             public float CenterX;
             public float CenterY;
             public float Width;
             public float Height;
-            public string Label;
+            public string LogLabel; // Renamed from Label - separated from UILabel which is cleaner
+            public string UILabel;
             public Vector3? WorldPos;
             public string ClassName;
         }
@@ -84,7 +89,7 @@ namespace PassthroughCameraSamples.MultiObjectDetection
             m_detectionCanvas.CapturePosition();
         }
 
-        public virtual void DrawUIBoxes(Tensor<float> output, Tensor<int> labelIDs, float imageWidth, float imageHeight)
+        public virtual void BuildBoundingBoxes(Tensor<float> output, Tensor<int> labelIDs, float imageWidth, float imageHeight)
         {
             // Updte canvas position
             m_detectionCanvas.UpdatePosition();
@@ -148,21 +153,36 @@ namespace PassthroughCameraSamples.MultiObjectDetection
                 // Create a new bounding box
                 var box = new BoundingBox
                 {
+                    Id = n, // added Id (n) for label identification
                     CenterX = centerX,
                     CenterY = centerY,
                     ClassName = classname,
                     Width = boxWidth,
                     Height = boxHeight,
-                    Label = $"Id: {n} Class: {classname} Center (px): {(int)centerX},{(int)centerY} Center (%): {perX:0.00},{perY:0.00}",
+                    UILabel = $"{classname}", // TODO: adjust here accordingly
+                    LogLabel = $"Id: {n} Class: {classname} Center (px): {(int)centerX},{(int)centerY} Center (%): {perX:0.00},{perY:0.00}",
                     WorldPos = worldPos,
                 };
 
                 // Add to the list of boxes
-                BoxDrawn.Add(box);
+                CurrentBoundingBoxList.Add(box);
 
-                // Draw 2D box
-                DrawBox(box, n, m_boxColor, m_fontColor);
+                // NOTE: Draw 2D box () moved this logic to DrawBoundingBoxes for separation of concerns
+                //DrawBox(box, n, m_boxColor, m_fontColor);
             }
+        }
+
+        public void DrawBoundingBoxes()
+        {
+            foreach (var box in CurrentBoundingBoxList)
+            {
+                DrawBox(box, box.Id, m_boxColor, m_fontColor);
+            }
+        }
+
+        public void DrawPrefabs()
+        {
+            m_detectionPrefabManager.UpdatePrefabs(CurrentBoundingBoxList);
         }
 
         protected virtual void ClearAnnotations()
@@ -171,7 +191,7 @@ namespace PassthroughCameraSamples.MultiObjectDetection
             {
                 box?.SetActive(false);
             }
-            BoxDrawn.Clear();
+            CurrentBoundingBoxList.Clear();
         }
 
         // NOTE: since there is a clear every redraw (there is no need to remake panels)
@@ -208,7 +228,7 @@ namespace PassthroughCameraSamples.MultiObjectDetection
             rt.sizeDelta = new Vector2(box.Width, box.Height);
             //Set label text
             var label = panel.GetComponentInChildren<Text>();
-            label.text = box.Label;
+            label.text = box.LogLabel;
             label.fontSize = 12;
         }
 
@@ -252,7 +272,7 @@ namespace PassthroughCameraSamples.MultiObjectDetection
         {
             // Get the 3D marker world position using Depth Raycast
             var centerPixel = new Vector2Int(Mathf.RoundToInt(perX * camRes.x), Mathf.RoundToInt((1.0f - perY) * camRes.y));
-            Vector3? worldPos;
+            Vector3? worldPos = null;
 #if !UNITY_EDITOR
             var ray = PassthroughCameraUtils.ScreenPointToRayInWorld(CameraEye, centerPixel);
 #else
