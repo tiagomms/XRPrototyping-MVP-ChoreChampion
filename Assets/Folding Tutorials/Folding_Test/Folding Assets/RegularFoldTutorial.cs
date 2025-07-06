@@ -5,18 +5,16 @@ using System;
 [RequireComponent(typeof(AudioSource))]
 public class RegularFoldTutorial : MonoBehaviour
 {
-    [Header("Prefabs & Spawn")]
-    [Tooltip("Interactable stencil + T-shirt prefab (face-down)")]
-    [SerializeField] private GameObject interactablePrefab;
-    [Tooltip("Non-interactable T-shirt prefab with Animator")]
+    [Header("References")]
+    [Tooltip("The interactable T-shirt instance that the user positions")]
+    [SerializeField] private GameObject interactableInstance;
+
+    [Header("Prefabs")]
+    [Tooltip("Animated, non-interactable T-shirt prefab with Animator")]
     [SerializeField] private GameObject nonInteractablePrefab;
-    [Tooltip("Where to spawn both variants")]
-    [SerializeField] private Transform spawnPoint;
 
     [Header("Steps")]
-    [Tooltip("One SnapInteractor per fold step (in order)")]
-    [SerializeField] private SnapInteractor[] snapInteractors;
-    [Tooltip("Animation trigger names for each step")]
+    [Tooltip("Animation trigger names for each step (must match SnapInteractors count)")]
     [SerializeField] private string[] animationTriggers;
     [Tooltip("Audio clips for each step (must match count)")]
     [SerializeField] private AudioClip[] stepClips;
@@ -29,72 +27,92 @@ public class RegularFoldTutorial : MonoBehaviour
 
     private AudioSource audioSource;
     private Animator animator;
-    private GameObject interactableInstance;
     private GameObject nonInteractableInstance;
+    private SnapInteractor[] snapInteractors;
     private int currentStep = -1;
 
     void Awake()
     {
         audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+            Debug.LogError("Missing AudioSource on " + name);
 
-        // Spawn the interactable face-down variant
-        interactableInstance = Instantiate(
-            interactablePrefab,
-            spawnPoint.position,
-            spawnPoint.rotation,
-            spawnPoint
-        );
-
-        // Spawn the non-interactable animated variant, but keep it hidden
-        nonInteractableInstance = Instantiate(
-            nonInteractablePrefab,
-            spawnPoint.position,
-            spawnPoint.rotation,
-            spawnPoint
-        );
-        nonInteractableInstance.SetActive(false);
-
-        animator = nonInteractableInstance.GetComponent<Animator>();
+        if (interactableInstance == null)
+            Debug.LogWarning("interactableInstance not set. Call RegisterInteractable() after spawning.");
     }
 
     /// <summary>
-    /// Call this (e.g. via UI Button OnClick) to swap to animated T-shirt and begin step 1.
+    /// Call this right after instantiating your interactable prefab
+    /// so the tutorial knows which object to swap out.
+    /// </summary>
+    public void RegisterInteractable(GameObject instance)
+    {
+        interactableInstance = instance;
+        Debug.Log($"RegularFoldTutorial: Registered interactable instance: {instance.name}");
+    }
+
+    /// <summary>
+    /// Call when you're ready to swap to the animated variant.
+    /// Hook this to a UI button via OnClick.
     /// </summary>
     public void StartFoldingTutorial()
     {
-        if (interactableInstance != null)
-            Destroy(interactableInstance);
+        if (interactableInstance == null)
+        {
+            Debug.LogError("RegularFoldTutorial: No interactableInstance. Cannot start tutorial.");
+            return;
+        }
 
-        nonInteractableInstance.SetActive(true);
+        // capture world transform + scale
+        Transform original = interactableInstance.transform;
+        Vector3 worldPos      = original.position;
+        Quaternion worldRot   = original.rotation;
+        Vector3 originalScale = original.localScale;
+        Transform parent      = original.parent;
+
+        // hide interactable
+        interactableInstance.SetActive(false);
+
+        // instantiate non-interactable at same transform
+        nonInteractableInstance = Instantiate(
+            nonInteractablePrefab,
+            worldPos,
+            worldRot,
+            parent);
+        nonInteractableInstance.transform.localScale = originalScale;
+
+        // get animator & interactors
+        animator = nonInteractableInstance.GetComponent<Animator>();
+        snapInteractors = nonInteractableInstance.GetComponentsInChildren<SnapInteractor>(true);
+        foreach (var si in snapInteractors)
+        {
+            si.enabled = false;
+            si.WhenStateChanged -= OnSnap;
+        }
+
+        // start steps
         AdvanceStep();
     }
 
     private void AdvanceStep()
     {
-        // Unsubscribe from previous step's snap event
-        if (currentStep >= 0 && currentStep < snapInteractors.Length)
-            snapInteractors[currentStep].WhenStateChanged -= OnSnap;
+        foreach (var si in snapInteractors)
+        {
+            si.WhenStateChanged -= OnSnap;
+            si.enabled = false;
+        }
 
         currentStep++;
-
         if (currentStep < snapInteractors.Length)
         {
-            // Trigger this step's animation
             animator.SetTrigger(animationTriggers[currentStep]);
-
-            // Play this step's audio
             audioSource.clip = stepClips[currentStep];
             audioSource.Play();
 
-            // Play VFX if assigned
-            if (stepVFX != null &&
-                currentStep < stepVFX.Length &&
-                stepVFX[currentStep] != null)
-            {
+            if (stepVFX != null && currentStep < stepVFX.Length && stepVFX[currentStep] != null)
                 stepVFX[currentStep].Play();
-            }
 
-            // Wait for the player to snap into the next socket
+            snapInteractors[currentStep].enabled = true;
             snapInteractors[currentStep].WhenStateChanged += OnSnap;
         }
         else
@@ -105,7 +123,7 @@ public class RegularFoldTutorial : MonoBehaviour
 
     private void OnSnap(InteractorStateChangeArgs args)
     {
-        if (args.NewState == InteractorState.Select)
+        if (args.PreviousState != InteractorState.Select && args.NewState == InteractorState.Select)
             AdvanceStep();
     }
 
@@ -113,7 +131,6 @@ public class RegularFoldTutorial : MonoBehaviour
     {
         audioSource.clip = outroClip;
         audioSource.Play();
-        // Clean up the whole tutorial after outro finishes
         Destroy(gameObject, outroClip.length + 0.1f);
     }
 }
