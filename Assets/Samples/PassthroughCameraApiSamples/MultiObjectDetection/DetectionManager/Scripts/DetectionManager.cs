@@ -14,28 +14,29 @@ namespace PassthroughCameraSamples.MultiObjectDetection
     {
         [SerializeField] private WebCamTextureManager m_webCamTextureManager;
 
-        [Header("Controls configuration")]
-
-        [SerializeField] private InputActionReference m_actionButton;
+        [Header("Controls configuration")] [SerializeField]
+        private InputActionReference m_actionButton;
         //[SerializeField] private OVRInput.RawButton m_actionButton = OVRInput.RawButton.A;
 
-        [Header("Ui references")]
-        [SerializeField] private DetectionUiMenuManager m_uiMenuManager;
+        [Header("Ui references")] [SerializeField]
+        private DetectionUiMenuManager m_uiMenuManager;
 
-        [Header("Placement configureation")]
-        [SerializeField] private GameObject m_spwanMarker;
+        [Header("Placement configureation")] [SerializeField]
+        private GameObject m_spwanMarker;
+
         [SerializeField] private EnvironmentRayCastSampleManager m_environmentRaycast;
         [SerializeField] private float m_spawnDistance = 0.25f;
         [SerializeField] private AudioSource m_placeSound;
 
-        [Header("Sentis inference ref")]
-        [SerializeField] private SentisInferenceRunManager m_runInference;
+        [Header("Sentis inference ref")] [SerializeField]
+        private SentisInferenceRunManager m_runInference;
+
         [SerializeField] private SentisInferenceUiManager m_uiInference;
 
-        [Header("Editor Testing")]
-        [SerializeField] private TestImageManager m_testImageManager;
-        [Space(10)]
-        public UnityEvent<int> OnObjectsIdentified;
+        [Header("Editor Testing")] [SerializeField]
+        private TestImageManager m_testImageManager;
+
+        [Space(10)] public UnityEvent<int> OnObjectsIdentified;
 
         private bool m_isPaused = true;
         private List<GameObject> m_spwanedEntities = new();
@@ -44,6 +45,7 @@ namespace PassthroughCameraSamples.MultiObjectDetection
         private float m_delayPauseBackTime = 0;
 
         #region Unity Functions
+
         private void Awake()
         {
             // NOTE: way of avoiding Oculus altogether if you just want to test on UNITY EDITOR the Unity Sentis
@@ -61,6 +63,7 @@ namespace PassthroughCameraSamples.MultiObjectDetection
             {
                 yield return null;
             }
+
             m_isSentisReady = true;
 
             // setup test manager only in unity_editor
@@ -107,11 +110,12 @@ namespace PassthroughCameraSamples.MultiObjectDetection
             {
                 // Press A button to spawn 3d markers
                 //Debug.Log($"[Detection Manager] - pressed: {m_actionButton.action.IsPressed()}");
-                if (m_actionButton.action.WasPressedThisFrame() && m_delayPauseBackTime <= 0)
+                // if (m_actionButton.action.WasPressedThisFrame() && m_delayPauseBackTime <= 0)
                 //if (OVRInput.GetUp(m_actionButton) && m_delayPauseBackTime <= 0)
-                {
-                    SpwanCurrentDetectedObjects();
-                }
+                // {
+                SpwanCurrentDetectedObjects();
+                // }
+
                 // Cooldown for the A button after return from the pause menu
                 m_delayPauseBackTime -= Time.deltaTime;
                 if (m_delayPauseBackTime <= 0)
@@ -128,6 +132,7 @@ namespace PassthroughCameraSamples.MultiObjectDetection
                     // Set the delay time for the A button to return from the pause menu
                     m_delayPauseBackTime = 0.1f;
                 }
+
                 return;
             }
 
@@ -137,9 +142,11 @@ namespace PassthroughCameraSamples.MultiObjectDetection
                 m_runInference.RunInference(currentTexture);
             }
         }
+
         #endregion
 
         #region Marker Functions
+
         /// <summary>
         /// Clean 3d markers when the tracking space is re-centered.
         /// </summary>
@@ -149,6 +156,7 @@ namespace PassthroughCameraSamples.MultiObjectDetection
             {
                 Destroy(e, 0.1f);
             }
+
             m_spwanedEntities.Clear();
             OnObjectsIdentified?.Invoke(-1);
         }
@@ -166,11 +174,13 @@ namespace PassthroughCameraSamples.MultiObjectDetection
                     count++;
                 }
             }
+
             if (count > 0)
             {
                 // Play sound if a new marker is placed.
                 m_placeSound.Play();
             }
+
             OnObjectsIdentified?.Invoke(count);
         }
 
@@ -189,6 +199,12 @@ namespace PassthroughCameraSamples.MultiObjectDetection
             var existMarker = false;
             foreach (var e in m_spwanedEntities)
             {
+                if (e == null)
+                {
+                    m_spwanedEntities.Remove(e); // Remove null entities from the list
+                    continue; // Skip if the entity is nullff
+                }
+
                 var markerClass = e.GetComponent<DetectionSpawnMarkerAnim>();
                 if (markerClass)
                 {
@@ -196,6 +212,9 @@ namespace PassthroughCameraSamples.MultiObjectDetection
                     if (dist < m_spawnDistance && markerClass.GetYoloClassName() == className)
                     {
                         existMarker = true;
+                        markerClass.transform.SetPositionAndRotation(position.Value,
+                            Quaternion.identity); // Update the position of the existing marker
+                        markerClass.RestTimeToLive(); // Reset the time to live for the existing marker
                         break;
                     }
                 }
@@ -214,9 +233,11 @@ namespace PassthroughCameraSamples.MultiObjectDetection
 
             return !existMarker;
         }
+
         #endregion
 
         #region Public Functions
+
         /// <summary>
         /// Pause the detection logic when the pause menu is active
         /// </summary>
@@ -224,6 +245,7 @@ namespace PassthroughCameraSamples.MultiObjectDetection
         {
             m_isPaused = pause;
         }
+
         #endregion
     }
 }

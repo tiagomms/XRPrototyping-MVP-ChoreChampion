@@ -825,7 +825,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5518670934586006478, guid: 8f403dcd176949148ab24331defe47fb, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 217
+      value: 217.00003
       objectReference: {fileID: 0}
     - target: {fileID: 6204767134508456339, guid: 8f403dcd176949148ab24331defe47fb, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1286,9 +1286,13 @@ PrefabInstance:
       propertyPath: m_Name
       value: TestCameraApiOnEditorPrefab
       objectReference: {fileID: 0}
-    - target: {fileID: 4934986454059658528, guid: 15d8d292e156be9448de79acf320b3e0, type: 3}
+    - target: {fileID: 3230543652566623816, guid: 15d8d292e156be9448de79acf320b3e0, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4934986454059658528, guid: 15d8d292e156be9448de79acf320b3e0, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5136674243020492421, guid: 15d8d292e156be9448de79acf320b3e0, type: 3}
       propertyPath: m_imageChangeInterval
@@ -2034,6 +2038,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1744462754}
     - target: {fileID: 2184060436030677583, guid: 927c1b782bb796b4b9b433d533cbccca, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2184060436030677583, guid: 927c1b782bb796b4b9b433d533cbccca, type: 3}
       propertyPath: debugCamera
       value: 
       objectReference: {fileID: 1744462754}
@@ -2056,10 +2064,10 @@ PrefabInstance:
     - target: {fileID: 2681575481727882275, guid: 927c1b782bb796b4b9b433d533cbccca, type: 3}
       propertyPath: OnnxModel
       value: 
-      objectReference: {fileID: 5022602860645237092, guid: 3d0afa548b0afd646b76226e5fad703d, type: 3}
+      objectReference: {fileID: 5022602860645237092, guid: 7e67dec102bcb6a409abf3f1a66ab50b, type: 3}
     - target: {fileID: 2681575481727882275, guid: 927c1b782bb796b4b9b433d533cbccca, type: 3}
       propertyPath: m_backend
-      value: 256
+      value: 512
       objectReference: {fileID: 0}
     - target: {fileID: 2681575481727882275, guid: 927c1b782bb796b4b9b433d533cbccca, type: 3}
       propertyPath: m_labelsAsset
@@ -2068,7 +2076,11 @@ PrefabInstance:
     - target: {fileID: 2681575481727882275, guid: 927c1b782bb796b4b9b433d533cbccca, type: 3}
       propertyPath: m_sentisModel
       value: 
-      objectReference: {fileID: 5022602860645237092, guid: 258b6b1e35a826044bd75a97ef79584d, type: 3}
+      objectReference: {fileID: 5022602860645237092, guid: a080f4b4b57f3714994ab4e7961b0192, type: 3}
+    - target: {fileID: 2681575481727882275, guid: 927c1b782bb796b4b9b433d533cbccca, type: 3}
+      propertyPath: m_layersPerFrame
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 4976470222712890361, guid: 927c1b782bb796b4b9b433d533cbccca, type: 3}
       propertyPath: m_debugCamera
       value: 

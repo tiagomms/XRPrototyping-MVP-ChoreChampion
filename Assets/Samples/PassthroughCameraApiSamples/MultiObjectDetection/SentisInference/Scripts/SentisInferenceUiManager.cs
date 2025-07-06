@@ -272,7 +272,7 @@ namespace PassthroughCameraSamples.MultiObjectDetection
         {
             // Get the 3D marker world position using Depth Raycast
             var centerPixel = new Vector2Int(Mathf.RoundToInt(perX * camRes.x), Mathf.RoundToInt((1.0f - perY) * camRes.y));
-            Vector3? worldPos;
+            Vector3? worldPos = null;
 #if !UNITY_EDITOR
             var ray = PassthroughCameraUtils.ScreenPointToRayInWorld(CameraEye, centerPixel);
 #else
