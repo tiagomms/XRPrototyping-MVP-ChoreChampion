@@ -445,7 +445,7 @@ namespace ChoreChampion.XR.MRUtilityKit
                 return false;
             }
 
-            position = surface.Transform.MultiplyPoint3x4(new Vector3(mappedPosition.x, mappedPosition.y, 0f));
+            position = surface.Transform.MultiplyPoint3x4(new (mappedPosition.x, mappedPosition.y, 0f));
             normal = surface.Transform.MultiplyVector(Vector3.forward);
             return true;
         }
