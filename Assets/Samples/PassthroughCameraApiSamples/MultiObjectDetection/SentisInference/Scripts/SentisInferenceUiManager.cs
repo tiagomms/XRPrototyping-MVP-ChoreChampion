@@ -310,7 +310,7 @@ namespace PassthroughCameraSamples.MultiObjectDetection
                               rawImageRotation * new Vector3(xOffset, yOffset, 0);
 
 
-            Debug.Log($"[CalculateWorldPosition] UNITY_EDITOR {(worldPos - debugCamera.transform.position)}; perX: {perX}; perY: {perY}; width {imageWidth}; height: {imageHeight}; Offsets x {xOffset}; y {yOffset}");
+            // Debug.Log($"[CalculateWorldPosition] UNITY_EDITOR {(worldPos - debugCamera.transform.position)}; perX: {perX}; perY: {perY}; width {imageWidth}; height: {imageHeight}; Offsets x {xOffset}; y {yOffset}");
             // Create a ray from the camera to this point
             if (debugCamera == null)
             {

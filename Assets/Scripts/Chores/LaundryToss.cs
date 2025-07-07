@@ -1,10 +1,12 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Chores
 {
     public class LaundryToss : Chore
     {
-        private float choreTimer = 10f;
+        [SerializeField] private float choreTimer = 10f;
+        public UnityEvent onMiniGameStarted = new();
 
         protected override void StartTutorial()
         {
@@ -16,6 +18,7 @@ namespace Chores
             isChoreActive = true;
             score = 0f;
             timeElapsed = 0f;
+            onMiniGameStarted.Invoke();
             Debug.Log("Starting Example Chore minigame!");
         }
 
@@ -34,6 +37,7 @@ namespace Chores
         protected override void Update()
         {
             base.Update();
+            if (!isChoreActive) return;
             if (timeElapsed >= choreTimer)
             {
                 CompleteChore();

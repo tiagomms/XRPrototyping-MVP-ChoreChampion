@@ -67,7 +67,8 @@ namespace Chores
         /// <summary>
         /// Ends the chore and cleans up the minigame.
         /// </summary>
-        public abstract void EndChore();    
+        public abstract void EndChore();
+
         /// <summary>
         /// The main update loop for the chore's gameplay mechanics.
         /// </summary>

@@ -13,12 +13,13 @@ namespace PassthroughCameraSamples.MultiObjectDetection
     [MetaCodeSample("PassthroughCameraApiSamples-MultiObjectDetection")]
     public class DetectionUiMenuManager : MonoBehaviour
     {
-        [Header("Ui buttons")]
-        [SerializeField] private InputActionReference m_actionButton;
+        [Header("Ui buttons")] [SerializeField]
+        private InputActionReference m_actionButton;
         //[SerializeField] private OVRInput.RawButton m_actionButton = OVRInput.RawButton.A;
 
-        [Header("Ui elements ref.")]
-        [SerializeField] private GameObject m_footerPanel;
+        [Header("Ui elements ref.")] [SerializeField]
+        private GameObject m_footerPanel;
+
         [SerializeField] private Text m_footerFilterInfo;
 
         [SerializeField] private GameObject m_loadingPanel;
@@ -27,6 +28,7 @@ namespace PassthroughCameraSamples.MultiObjectDetection
         [SerializeField] private Text m_labelInfromation;
         [SerializeField] private AudioSource m_buttonSound;
 
+        private bool _activeMenu = false;
         public bool IsInputActive { get; set; } = false;
 
         public UnityEvent<bool> OnPause;
@@ -41,29 +43,31 @@ namespace PassthroughCameraSamples.MultiObjectDetection
         public bool IsPaused { get; private set; } = true;
 
         #region Unity Functions
+
         private IEnumerator Start()
         {
             m_initialPanel.SetActive(false);
             m_noPermissionPanel.SetActive(false);
-            m_loadingPanel.SetActive(true);
+            // m_loadingPanel.SetActive(true);
             // Wait until Sentis model is loaded
             var sentisInference = FindFirstObjectByType<SentisInferenceRunManager>();
-            
+
             while (!sentisInference.IsModelLoaded)
             {
                 yield return null;
             }
+
             m_loadingPanel.SetActive(false);
 
             while (!PassthroughCameraPermissions.HasCameraPermission.HasValue)
             {
                 yield return null;
             }
+
             if (PassthroughCameraPermissions.HasCameraPermission == false)
             {
                 OnNoPermissionMenu();
             }
-
         }
 
         private void OnDestroy()
@@ -80,9 +84,11 @@ namespace PassthroughCameraSamples.MultiObjectDetection
                 InitialMenuUpdate();
             }
         }
+
         #endregion
 
         #region Ui state: No permissions Menu
+
         private void OnNoPermissionMenu()
         {
             m_initialMenu = false;
@@ -90,9 +96,11 @@ namespace PassthroughCameraSamples.MultiObjectDetection
             m_initialPanel.SetActive(false);
             m_noPermissionPanel.SetActive(true);
         }
+
         #endregion
 
         #region Ui state: Initial Menu
+
         public void OnInitialMenu(bool hasScenePermission)
         {
             // Check if we have the Scene data permission
@@ -112,7 +120,7 @@ namespace PassthroughCameraSamples.MultiObjectDetection
         private void InitialMenuUpdate()
         {
             //if (OVRInput.GetUp(m_actionButton) || Input.GetKey(KeyCode.Return))
-            if (m_actionButton.action.WasPressedThisFrame())
+            if (m_actionButton.action.WasPressedThisFrame() || _activeMenu)
             {
                 m_buttonSound?.Play();
                 OnPauseMenu(false);
@@ -129,12 +137,15 @@ namespace PassthroughCameraSamples.MultiObjectDetection
 
             OnPause?.Invoke(visible);
         }
+
         #endregion
 
         #region Ui state: detection information
+
         private void UpdateLabelInformation()
         {
-            m_labelInfromation.text = $"Unity Sentis version: 2.1.1\nAI model: Yolo\nDetecting objects: {m_objectsDetected}\nObjects identified: {m_objectsIdentified}";
+            m_labelInfromation.text =
+                $"Unity Sentis version: 2.1.1\nAI model: Yolo\nDetecting objects: {m_objectsDetected}\nObjects identified: {m_objectsIdentified}";
         }
 
         public void OnObjectsDetected(int objects)
@@ -154,8 +165,22 @@ namespace PassthroughCameraSamples.MultiObjectDetection
             {
                 m_objectsIdentified += objects;
             }
+
             UpdateLabelInformation();
         }
+
         #endregion
+
+        public void activateMenu()
+        {
+            _activeMenu = true;
+            IsInputActive = true;
+        }
+        
+        public void DeactivateMenu()
+        {
+            _activeMenu = false;
+            IsInputActive = false;
+        }
     }
 }
