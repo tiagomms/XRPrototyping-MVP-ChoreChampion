@@ -49,4 +49,14 @@ public class UIManager : MonoBehaviour
         currentUI = navigationStack.Pop();
         currentUI.SetActive(true);
     }
+
+    public void HideCurrentPanel()
+    {
+        currentUI.SetActive(false);
+    }
+
+    public void ShowCurrentPanel()
+    {
+        currentUI.SetActive(true);
+    }
 }
