@@ -1,5 +1,7 @@
+using Meta.XR.MRUtilityKit;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 
 namespace Chores
 {
@@ -9,11 +11,21 @@ namespace Chores
     /// </summary>
     public abstract class Chore : MonoBehaviour
     {
-        [Header("Chore Configuration")] [SerializeField]
-        protected string choreId;
+        public enum PlayMode
+        {
+            SelectArea = 0,
+            AllAreas = 1
+        }
 
+        [Header("Chore Configuration")][SerializeField] protected string choreId;
         [SerializeField] protected string choreName;
-        [TextArea] [SerializeField] protected string choreDescription;
+        [TextArea][SerializeField] protected string choreDescription;
+
+        protected PlayMode _playMode = PlayMode.AllAreas;
+
+        // Singleton instance
+        public static Chore Instance { get; protected set; }
+
 
         protected bool isChoreActive;
         protected float timeElapsed;
@@ -23,6 +35,10 @@ namespace Chores
         public UnityEvent<ChoreStats> onChoreCompleted = new();
         public UnityEvent onChoreEnded = new();
 
+        public UnityEvent<MRUKAnchor> onSelectGameAnchor;
+        protected MRUKAnchor _selectedGameAnchor;
+
+
         /// <summary>
         /// Starts the core gameplay logic for this chore.
         /// </summary>
@@ -31,10 +47,14 @@ namespace Chores
             timeElapsed = 0f;
             if (hasPlayedChore) // If this is the first time playing, show a tutorial or introduction
             {
+                isChoreActive = true;
+                timeElapsed = 0f;
                 StarMiniGameChore();
             }
             else
             {
+                // I don't think the tutorial needs a timer
+                // otherwise you need to trigger a reset at the end
                 StartTutorial();
             }
 
@@ -59,7 +79,6 @@ namespace Chores
         /// </summary>
         public virtual void CompleteChore()
         {
-            isChoreActive = false;
             var choreStats = new ChoreStats(choreId, score, timeElapsed);
             onChoreCompleted.Invoke(choreStats);
         }
@@ -84,5 +103,48 @@ namespace Chores
         {
             return choreId;
         }
+
+        /// <summary>
+        /// @Daniel - please review this - it was missing
+        /// </summary>
+        public void QuitGame()
+        {
+            if (isChoreActive)
+            {
+                CompleteChore();
+            }
+
+            SceneManager.LoadScene(0);
+        }
+
+        #region Select Game Area
+
+        public virtual void GameAreaSelected(MRUKAnchor anchor)
+        {
+            _playMode = PlayMode.SelectArea;
+
+            _selectedGameAnchor = anchor;
+            onSelectGameAnchor?.Invoke(anchor);
+
+            // NOTE: need to be maintained due to incompatibility issues
+            //xtdAnchorPrefabSpawner.SetGameAnchor(anchor);
+
+            // ???: start game immediately or 3...2...1... then start game
+        }
+
+        public MRUKAnchor GetGameArea()
+        {
+            return _selectedGameAnchor;
+        }
+
+        public virtual void Reset()
+        {
+            isChoreActive = false;
+            timeElapsed = 0f; // reset timer and chores 
+            // ???: unsure of this
+            _playMode = PlayMode.AllAreas;
+        }
+
+        #endregion
     }
 }
