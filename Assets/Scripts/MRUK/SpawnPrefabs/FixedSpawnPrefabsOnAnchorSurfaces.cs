@@ -26,7 +26,7 @@ namespace ChoreChampion.XR.MRUtilityKit
         protected MRUKExtension.SnapTarget snapTarget = MRUKExtension.SnapTarget.NearestEdge;
 
         [SerializeField, Tooltip("On spawn based on user position, given the local position provided, clamp value in axis"), HideIf(nameof(spawnBasedOn), SpawnBasedOn.AnchorTransform)]
-        protected MRUKExtension.Clamp2DValues clampLocalPositions = MRUKExtension.Clamp2DValues.X;
+        protected MRUKExtension.Clamp2DValues clampLocalPositions = MRUKExtension.Clamp2DValues.None;
 
         /// <summary>
         /// List of fixed local positions to spawn prefabs at. Cycles through this list when spawn amount exceeds list size.

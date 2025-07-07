@@ -18440,7 +18440,7 @@ MonoBehaviour:
   allowStretch: 0
   spawnBasedOn: 1
   snapTarget: 3
-  clampLocalPositions: 1
+  clampLocalPositions: 0
   fixedLocalPositions:
   - {x: 0.1, y: 0.1}
   - {x: 0.2, y: 0.2}
