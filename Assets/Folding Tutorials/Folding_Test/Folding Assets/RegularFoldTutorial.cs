@@ -106,8 +106,19 @@ public class RegularFoldTutorial : MonoBehaviour
         DisableInteractableComponents();
 
         // spawn non-interactable at same world transform
-        nonInteractableInstance = Instantiate(nonInteractablePrefab, worldPos, worldRot, t.parent);
-        nonInteractableInstance.transform.localScale = worldScale;
+        nonInteractableInstance = Instantiate(
+            nonInteractablePrefab, 
+            worldPos, 
+            worldRot, 
+            t.parent
+        );
+
+        // preserve prefab’s original Z-scale
+        float prefabZ = nonInteractablePrefab.transform.localScale.z;
+        Vector3 targetScale = new Vector3(worldScale.x, worldScale.y, prefabZ);
+
+        nonInteractableInstance.transform.localScale = targetScale;
+
 
         // reset the interactable child back to its original local transform and scale
         interactableInstance.transform.localPosition = originalLocalPos;

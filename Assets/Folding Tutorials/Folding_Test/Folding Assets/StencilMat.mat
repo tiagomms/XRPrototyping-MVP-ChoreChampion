@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: TshirtMat
+  m_Name: StencilMat
   m_Shader: {fileID: 4800000, guid: b0b4d9b7641b02f45a805c4a4ad9048a, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -118,7 +118,7 @@ Material:
     - _WorkflowMode: 0
     - _ZWrite: 0
     m_Colors:
-    - _BaseColor: {r: 0.17412782, g: 0.51854587, b: 0.8584906, a: 0.34117648}
+    - _BaseColor: {r: 0.17412779, g: 0.8235294, b: 0.8584906, a: 0.16470589}
     - _Color: {r: 0.40094337, g: 0.9611117, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
