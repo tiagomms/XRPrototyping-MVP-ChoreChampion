@@ -109,15 +109,13 @@ namespace PassthroughCameraSamples.MultiObjectDetection
             }
             else
             {
-
                 // Press A button to spawn 3d markers
                 //Debug.Log($"[Detection Manager] - pressed: {m_actionButton.action.IsPressed()}");
                 if ((m_actionButton.action.WasPressedThisFrame() && m_delayPauseBackTime <= 0) || autoTrack)
-                    //if (OVRInput.GetUp(m_actionButton) && m_delayPauseBackTime <= 0)
+                //if (OVRInput.GetUp(m_actionButton) && m_delayPauseBackTime <= 0)
                 {
                     SpwanCurrentDetectedObjects();
                 }
-
                 // Cooldown for the A button after return from the pause menu
                 m_delayPauseBackTime -= Time.deltaTime;
                 if (m_delayPauseBackTime <= 0)
