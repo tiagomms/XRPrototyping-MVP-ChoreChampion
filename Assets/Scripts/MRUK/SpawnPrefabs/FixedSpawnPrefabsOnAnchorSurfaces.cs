@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using Meta.XR.MRUtilityKit;
+using NaughtyAttributes;
 
 namespace ChoreChampion.XR.MRUtilityKit
 {
@@ -11,19 +12,20 @@ namespace ChoreChampion.XR.MRUtilityKit
     {
         protected enum SpawnBasedOn
         {
-            UserPosition = 0,
-            AnchorTransform = 1
+            
+            AnchorTransform = 0,
+            UserPosition = 1
         }
 
         [Space]
         [Header("Fixed Spawn Variables")]
         [SerializeField, Tooltip("Spawn things based on user position or Anchor transform")]
-        protected SpawnBasedOn spawnBasedOn = SpawnBasedOn.UserPosition;
+        protected SpawnBasedOn spawnBasedOn;
 
-        [SerializeField, Tooltip("On spawn based on user position, where it should spawn")]
+        [SerializeField, Tooltip("On spawn based on user position, where it should spawn"), HideIf(nameof(spawnBasedOn), SpawnBasedOn.AnchorTransform)]
         protected MRUKExtension.SnapTarget snapTarget = MRUKExtension.SnapTarget.NearestEdge;
 
-        [SerializeField, Tooltip("Based on local position provided, clamp value in axis if needed")]
+        [SerializeField, Tooltip("On spawn based on user position, given the local position provided, clamp value in axis"), HideIf(nameof(spawnBasedOn), SpawnBasedOn.AnchorTransform)]
         protected MRUKExtension.Clamp2DValues clampLocalPositions = MRUKExtension.Clamp2DValues.X;
 
         /// <summary>

@@ -16146,7 +16146,7 @@ MonoBehaviour:
   SurfaceClearanceDistance: 0.1
   parentToAnchor: 1
   allowStretch: 1
-  spawnBasedOn: 1
+  spawnBasedOn: 0
   snapTarget: 3
   clampLocalPositions: 1
   fixedLocalPositions:
@@ -18438,7 +18438,7 @@ MonoBehaviour:
   SurfaceClearanceDistance: 0.1
   parentToAnchor: 0
   allowStretch: 0
-  spawnBasedOn: 0
+  spawnBasedOn: 1
   snapTarget: 3
   clampLocalPositions: 1
   fixedLocalPositions:

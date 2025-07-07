@@ -473,21 +473,6 @@ namespace ChoreChampion.XR.MRUtilityKit
             // TODO: Right now only works on a single surface (the first one). Extend code in the future
             var surface = anchorSurfacesList[0];
             surface.GetClosestPositionToSurface(centerEyeTransform.position, _minRadius, out var mappedPosition, out position, out normal, snapTarget, localPosition, clampLocation);
-
-            // you get the closest local surface 2d vector, and you add the local position 
-            //mappedPosition = new Vector2(mappedPosition.x + localPosition.x, mappedPosition.y + localPosition.y);
-            //position = surface.Transform.MultiplyPoint3x4(new(mappedPosition.x, mappedPosition.y, 0f));
-            // TODO: only works for on top of surfaces right now
-            //position += new Vector3(localPosition.x, 0f, localPosition.y);
-            //normal = surface.Transform.MultiplyVector(Vector3.forward);
-            /*
-            if (surface.IsPlane && !surface.Anchor.IsPositionInBoundary(mappedPosition))
-            {
-                position = Vector3.zero;
-                normal = Vector3.zero;
-                return false;
-            }
-            */
             return true;
         }
 
