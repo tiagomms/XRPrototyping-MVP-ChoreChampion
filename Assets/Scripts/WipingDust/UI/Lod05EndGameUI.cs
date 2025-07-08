@@ -14,25 +14,43 @@ namespace LastOfDust.UI
         [SerializeField] private Button reanchorSurfaceButton;
         [SerializeField] private Button quitGame;
 
+        // TODO: here UI team, you define what you want to do - I literally created 2 fake gameobjects for tests
+        // NOTE: here it is unclear if they are different panels or text with changes, I assume game objects
+        [SerializeField] private GameObject gameLostSection;
+        [SerializeField] private GameObject gameWonSection;
 
         [SerializeField] private Lod03SurfaceSelectionScreenUI surfaceSelectionScreenUI;
 
         protected override void OnEnable()
         {
             base.OnEnable();
+            DisplayGameResultSection();
 
             if (retryButton != null)
             {
                 retryButton.onClick.AddListener(OnRetry);
             }
-            if (reanchorSurfaceButton != null && LastOfDustChore.Instance.PlayMode == Chore.PlayModeEnum.SelectArea)
+            if (reanchorSurfaceButton != null)
             {
+                // ???: interactable or not visible?
+                reanchorSurfaceButton.interactable = LastOfDustChore.Instance.PlayMode == PlayModeEnum.SelectArea;
+
                 reanchorSurfaceButton.onClick.AddListener(GoToReanchorSurface);
             }
             if (quitGame != null)
             {
                 quitGame.onClick.AddListener(OnQuitGame);
             }
+        }
+
+        private void DisplayGameResultSection()
+        {
+            if (LastOfDustChore.Instance == null) return;
+            bool timesUp = LastOfDustChore.Instance.ChoreCurrentTime == 0f;
+
+            // TODO: here UI team, you define what you want to do - I literally created 2 fake gameobjects for tests
+            gameLostSection.SetActive(timesUp);
+            gameWonSection.SetActive(!timesUp);
         }
 
         protected override void OnDisable()
@@ -43,7 +61,7 @@ namespace LastOfDust.UI
             {
                 retryButton.onClick.RemoveListener(OnRetry);
             }
-            if (reanchorSurfaceButton != null && LastOfDustChore.Instance.PlayMode == Chore.PlayModeEnum.SelectArea)
+            if (reanchorSurfaceButton != null)
             {
                 reanchorSurfaceButton.onClick.RemoveListener(GoToReanchorSurface);
             }
@@ -70,7 +88,7 @@ namespace LastOfDust.UI
         {
             FullReset();
 
-            LastOfDustChore.Instance.PlayMode = Chore.PlayModeEnum.SelectArea;
+            LastOfDustChore.Instance.PlayMode = PlayModeEnum.SelectArea;
             BaseUIManager.Instance.GoTo(surfaceSelectionScreenUI);
         }
 

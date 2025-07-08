@@ -3083,6 +3083,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 251537017}
+  - component: {fileID: 251537018}
   m_Layer: 0
   m_Name: 05-EndGameUI
   m_TagString: Untagged
@@ -3102,9 +3103,31 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1925131521}
+  - {fileID: 531298038}
   m_Father: {fileID: 2138824866}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &251537018
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 251537016}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 509ab12e0ba50b248b473e52296f4a91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uiObject: {fileID: 0}
+  backButton: {fileID: 0}
+  retryButton: {fileID: 0}
+  reanchorSurfaceButton: {fileID: 0}
+  quitGame: {fileID: 0}
+  gameLostSection: {fileID: 1925131520}
+  gameWonSection: {fileID: 531298037}
+  surfaceSelectionScreenUI: {fileID: 1088566231}
 --- !u!1 &251571326
 GameObject:
   m_ObjectHideFlags: 0
@@ -6208,6 +6231,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1950540753}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &531298037
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 531298038}
+  m_Layer: 0
+  m_Name: GameWonSection
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &531298038
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 531298037}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 251537017}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &538287154
 GameObject:
   m_ObjectHideFlags: 0
@@ -6949,6 +7003,7 @@ GameObject:
   m_Component:
   - component: {fileID: 604935495}
   - component: {fileID: 604935496}
+  - component: {fileID: 604935497}
   m_Layer: 0
   m_Name: LastOfDustChore
   m_TagString: Untagged
@@ -6986,7 +7041,11 @@ MonoBehaviour:
   choreId: 
   choreName: 
   choreDescription: 
+  choreTimer: 10
   onChoreActive:
+    m_PersistentCalls:
+      m_Calls: []
+  onChoreTimesUp:
     m_PersistentCalls:
       m_Calls: []
   onChoreCompleted:
@@ -6995,12 +7054,33 @@ MonoBehaviour:
   onChoreEnded:
     m_PersistentCalls:
       m_Calls: []
-  onSelectGameAnchor:
-    m_PersistentCalls:
-      m_Calls: []
+  pointSystem: {fileID: 604935497}
   xtdAnchorPrefabSpawner: {fileID: 1092795428}
   tapAnchorMechanism: {fileID: 1409004867}
   randomMonsterSpawner: {fileID: 2111625131}
+  onSelectGameAnchor:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &604935497
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 604935494}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b16cfd7f62e3a394791513f0e6ece8a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  monsterKillPoints: 1
+  surfaceCleanPoints: 10
+  anchorCleanPoints: 15
+  roomCleanPoints: 30
+  randomMonsterSpawner: {fileID: 2111625131}
+  onScore:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &605470458
 GameObject:
   m_ObjectHideFlags: 0
@@ -11931,7 +12011,7 @@ MonoBehaviour:
   uiObject: {fileID: 0}
   backButton: {fileID: 0}
   tapAnchorMechanism: {fileID: 1409004867}
-  nextUiScreen: {fileID: 0}
+  nextUiScreen: {fileID: 2075280918}
 --- !u!1 &1092795427
 GameObject:
   m_ObjectHideFlags: 0
@@ -15693,6 +15773,9 @@ MonoBehaviour:
   onSpawned:
     m_PersistentCalls:
       m_Calls: []
+  onSpawnedObjectKilled:
+    m_PersistentCalls:
+      m_Calls: []
   onSurfaceCleaned:
     m_PersistentCalls:
       m_Calls: []
@@ -15853,6 +15936,7 @@ MonoBehaviour:
   surfaceCleanMode: {fileID: 0}
   deepCleanMode: {fileID: 0}
   surfaceSelectionUiScreen: {fileID: 1088566231}
+  hudInGameUI: {fileID: 2075280918}
 --- !u!1 &1420294542
 GameObject:
   m_ObjectHideFlags: 0
@@ -18044,6 +18128,9 @@ MonoBehaviour:
   straightPlacement: 0
   allowStretch: 0
   onSpawned:
+    m_PersistentCalls:
+      m_Calls: []
+  onSpawnedObjectKilled:
     m_PersistentCalls:
       m_Calls: []
   onSurfaceCleaned:
@@ -22147,6 +22234,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1250626162}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1925131520
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1925131521}
+  m_Layer: 0
+  m_Name: GameLostSection
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1925131521
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1925131520}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 251537017}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1925796346
 GameObject:
   m_ObjectHideFlags: 0
@@ -24013,6 +24131,8 @@ MonoBehaviour:
   - {fileID: 1354297986}
   - {fileID: 1418813877}
   - {fileID: 1088566231}
+  - {fileID: 2075280918}
+  - {fileID: 251537018}
   pausePanel: {fileID: 0}
 --- !u!4 &2044500700
 Transform:
@@ -24351,6 +24471,57 @@ Transform:
   - {fileID: 454085073}
   m_Father: {fileID: 1583361295}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2075280916
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2075280917}
+  - component: {fileID: 2075280918}
+  m_Layer: 0
+  m_Name: 04-InGameUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2075280917
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2075280916}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2138824866}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2075280918
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2075280916}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eac7e9f04bf52d946a2f289f7155851f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uiObject: {fileID: 0}
+  backButton: {fileID: 0}
+  timerText: {fileID: 0}
+  scoreText: {fileID: 0}
+  next: {fileID: 251537018}
+  timerStr: 00:00
+  scoreStr: 0
 --- !u!1 &2084526950
 GameObject:
   m_ObjectHideFlags: 0
@@ -24986,6 +25157,9 @@ MonoBehaviour:
   onSpawned:
     m_PersistentCalls:
       m_Calls: []
+  onSpawnedObjectKilled:
+    m_PersistentCalls:
+      m_Calls: []
   onSurfaceCleaned:
     m_PersistentCalls:
       m_Calls: []
@@ -25402,6 +25576,7 @@ Transform:
   - {fileID: 1354297985}
   - {fileID: 1418813876}
   - {fileID: 1088566230}
+  - {fileID: 2075280917}
   - {fileID: 251537017}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

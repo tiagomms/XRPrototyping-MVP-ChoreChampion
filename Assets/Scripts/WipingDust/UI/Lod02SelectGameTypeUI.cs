@@ -14,8 +14,9 @@ namespace LastOfDust.UI
         [SerializeField] private Button deepCleanMode;
 
 
-        [Header("Next")]
+        [Header("Next UI depending on Button Select")]
         [SerializeField] private Lod03SurfaceSelectionScreenUI surfaceSelectionUiScreen;
+        [SerializeField] private Lod04HudInGameUI hudInGameUI;
 
         protected override void OnEnable()
         {
@@ -46,7 +47,7 @@ namespace LastOfDust.UI
         [Button]
         private void OnStartDeepCleanGameMode()
         {
-            BaseUIManager.Instance.HideCurrentPanel();
+            BaseUIManager.Instance.GoTo(hudInGameUI);
 
             LastOfDustChore.Instance.StartChore(true);
         }

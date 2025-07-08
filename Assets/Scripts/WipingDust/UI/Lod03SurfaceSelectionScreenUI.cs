@@ -7,7 +7,6 @@ using System;
 using Oculus.Interaction;
 using System.Collections.Generic;
 using NaughtyAttributes;
-using Meta.WitAi.CallbackHandlers;
 
 namespace LastOfDust.UI
 {
@@ -69,8 +68,9 @@ namespace LastOfDust.UI
             DisableInteractables();
             LastOfDustChore.Instance.GameAreaSelected(value.Anchor);
             tapAnchorMechanism.ClearSpawnedObjects();
+            
             // TODO: 3...2...1... Initialize game
-            BaseUIManager.Instance.HideCurrentPanel();
+            BaseUIManager.Instance.GoTo(nextUiScreen);
 
             LastOfDustChore.Instance.StartChore(true);
         }

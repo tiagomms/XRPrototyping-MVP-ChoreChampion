@@ -11,14 +11,29 @@ namespace Chores
 {
     public class LastOfDustChore : Chore
     {
+        [Header("Score System")]
+        [SerializeField] private LastOfDustPointSystem pointSystem;
+
         [Header("Spawners")]
         [SerializeField] private ExtendedAnchorPrefabSpawner xtdAnchorPrefabSpawner;
         [SerializeField] private PlaceAndStretchSingleObjectOnAnchor tapAnchorMechanism;
         [SerializeField] private RandomSpawnPrefabsOnAnchorSurfaces randomMonsterSpawner;
 
+        [Header("Other settings")]
+        [SerializeField] private bool removeMonstersOnTimesUp = true;
 
         // Singleton instance
         public static LastOfDustChore Instance { get; protected set; }
+
+        protected PlayModeEnum _playMode = PlayModeEnum.AllAreas;
+        public PlayModeEnum PlayMode
+        {
+            get => _playMode;
+            set => _playMode = value;
+        }
+
+        public UnityEvent<MRUKAnchor> onSelectGameAnchor;
+        protected MRUKAnchor _selectedGameAnchor;
 
         /// <summary>
         /// Chores only exist in their own scene
@@ -32,6 +47,9 @@ namespace Chores
                 return;
             }
             Instance = this;
+
+            // point system only enabled when game starts
+            pointSystem.enabled = false;
         }
 
         protected virtual void Start()
@@ -39,6 +57,17 @@ namespace Chores
             randomMonsterSpawner.onSurfaceCleaned.AddListener(OnSurfaceCleaned);
             randomMonsterSpawner.onAnchorCleaned.AddListener(OnAnchorCleaned);
             randomMonsterSpawner.onRoomCleaned.AddListener(OnRoomCleaned);
+
+            onChoreTimesUp.AddListener(MonsterCleanUp);
+        }
+
+        protected virtual void OnDestroy()
+        {
+            randomMonsterSpawner.onSurfaceCleaned.RemoveListener(OnSurfaceCleaned);
+            randomMonsterSpawner.onAnchorCleaned.RemoveListener(OnAnchorCleaned);
+            randomMonsterSpawner.onRoomCleaned.RemoveListener(OnRoomCleaned);
+
+            onChoreTimesUp.RemoveListener(MonsterCleanUp);
         }
 
         protected override void StartTutorial()
@@ -48,6 +77,11 @@ namespace Chores
 
         public override void StarMiniGameChore()
         {
+            isChoreActive = true;
+
+            // point system only enabled when game starts
+            pointSystem.enabled = true;
+
             Debug.Log("Starting Minigame for Example Chore");
 
             if (_playMode == PlayModeEnum.AllAreas)
@@ -56,14 +90,17 @@ namespace Chores
             }
             else if (_playMode == PlayModeEnum.SelectArea)
             {
-                randomMonsterSpawner.SetGameAnchor(_selectedGameAnchor);
-                randomMonsterSpawner.SpawnOnGameAnchor();
+                randomMonsterSpawner.SpawnOnAnchor(_selectedGameAnchor);
             }
         }
 
-        public override void CompleteChore()
+        public override void CompleteChore(bool inTime = true)
         {
-            base.CompleteChore();
+            base.CompleteChore(inTime);
+
+            // point system disabled once chore is complete
+            pointSystem.enabled = false;
+
             Debug.Log("Example Chore completed!");
         }
 
@@ -80,13 +117,6 @@ namespace Chores
             tapAnchorMechanism.SpawnOnAllAnchors();
         }
 
-        public override void GameAreaSelected(MRUKAnchor anchor)
-        {
-            base.GameAreaSelected(anchor);
-            // NOTE: need to be maintained due to incompatibility issues
-            xtdAnchorPrefabSpawner.SetGameAnchor(anchor);
-        }
-
         private void OnSurfaceCleaned()
         {
             Debug.Log($"[{nameof(LastOfDustChore)}] - {nameof(OnSurfaceCleaned)}");
@@ -101,12 +131,54 @@ namespace Chores
         {
             Debug.Log($"[{nameof(LastOfDustChore)}] - {nameof(OnRoomCleaned)}");
             var uiManager = BaseUIManager.Instance;
-            
+
             // get the last one - should be the end menu
             // ???: use a int to state the last 
-            uiManager.GoTo(uiManager.UiPanels.Count - 1);
+            CompleteChore();
         }
 
         #endregion
+        #region Select Game Area
+
+        public virtual void GameAreaSelected(MRUKAnchor anchor)
+        {
+            _playMode = PlayModeEnum.SelectArea;
+
+            _selectedGameAnchor = anchor;
+            onSelectGameAnchor?.Invoke(anchor);
+
+            // NOTE: need to be maintained due to incompatibility issues
+            xtdAnchorPrefabSpawner.SetGameAnchor(anchor);
+
+            // ???: start game immediately or 3...2...1... then start game
+        }
+
+        public MRUKAnchor GetGameArea()
+        {
+            return _selectedGameAnchor;
+        }
+
+        private void MonsterCleanUp()
+        {
+            if (removeMonstersOnTimesUp)
+            {
+                randomMonsterSpawner.ClearSpawnedObjects();
+            }
+        }
+
+        #endregion
+
+        public override void Reset()
+        {
+            base.Reset();
+
+            randomMonsterSpawner.ClearSpawnedObjects();
+            tapAnchorMechanism.ClearSpawnedObjects();
+
+            _playMode = PlayModeEnum.AllAreas;
+            _selectedGameAnchor = null;
+            onSelectGameAnchor?.Invoke(null);
+        }
+
     }
 }
