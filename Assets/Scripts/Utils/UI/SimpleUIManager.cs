@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class UIManager : MonoBehaviour
+public class SimpleUIManager : MonoBehaviour
 {
     [Header("Assign all UI panels here (Main Menu should be first)")]
     [SerializeField] private List<GameObject> uiPanels;
@@ -47,6 +47,16 @@ public class UIManager : MonoBehaviour
             currentUI.SetActive(false);
 
         currentUI = navigationStack.Pop();
+        currentUI.SetActive(true);
+    }
+
+    public void HideCurrentPanel()
+    {
+        currentUI.SetActive(false);
+    }
+
+    public void ShowCurrentPanel()
+    {
         currentUI.SetActive(true);
     }
 }

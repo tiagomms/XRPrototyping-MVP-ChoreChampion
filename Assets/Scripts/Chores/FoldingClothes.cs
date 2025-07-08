@@ -29,10 +29,12 @@ namespace Chores
             Debug.Log("Starting Example Chore minigame!");
         }
 
-        public override void CompleteChore()
+        public override void CompleteChore(bool inTime = true)
         {
-            base.CompleteChore();
+            base.CompleteChore(inTime);
+
             timerText.gameObject.SetActive(false);
+            
             Debug.Log("Example Chore completed!");
         }
 

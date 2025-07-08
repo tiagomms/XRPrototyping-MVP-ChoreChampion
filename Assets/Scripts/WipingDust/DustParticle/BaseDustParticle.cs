@@ -1,13 +1,14 @@
 using UnityEngine;
 using UnityEngine.Events;
 using System.Collections.Generic;
+using ChoreChampion.XR.MRUtilityKit;
 
 /// <summary>
 /// Abstract base class for dust particle objects. Contains shared fields, cooldown, life, and event logic.
 /// Does NOT implement trigger or collision logic; derived classes must handle those.
 /// </summary>
 [RequireComponent(typeof(Rigidbody))]
-public abstract class BaseDustParticle : MonoBehaviour
+public abstract class BaseDustParticle : MRUKSpawnedObject
 {
     /// <summary>
     /// All child colliders of this dust particle.
@@ -123,8 +124,9 @@ public abstract class BaseDustParticle : MonoBehaviour
         return interactionLayerMask.IsLayerInMask(layer);
     }
 
-    protected void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         onDustParticleHit.RemoveAllListeners();
         onDustParticleKilled.RemoveAllListeners();
     }

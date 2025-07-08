@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public static class LayerExtension 
+public static class PhysicsLayerExtensions 
 {
     
     /// <summary>
