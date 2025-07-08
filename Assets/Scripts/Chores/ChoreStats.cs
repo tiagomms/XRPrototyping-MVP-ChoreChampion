@@ -9,12 +9,14 @@ namespace Chores
         public string choreId;
         public float score;
         public float timeTaken;
+        public bool inTime;
 
-        public ChoreStats(string choreId, float score, float timeTaken)
+        public ChoreStats(string choreId, float score, float timeTaken, bool inTime)
         {
             this.choreId = choreId;
             this.score = score;
             this.timeTaken = timeTaken;
+            this.inTime = inTime;
         }
     }
 }

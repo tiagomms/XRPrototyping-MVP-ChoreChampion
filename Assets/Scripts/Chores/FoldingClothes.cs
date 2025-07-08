@@ -14,9 +14,9 @@ namespace Chores
             Debug.Log("Starting Minigame for Example Chore");
         }
 
-        public override void CompleteChore()
+        public override void CompleteChore(bool inTime = true)
         {
-            base.CompleteChore();
+            base.CompleteChore(inTime);
             Debug.Log("Example Chore completed!");
         }
 

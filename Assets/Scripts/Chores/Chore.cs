@@ -5,39 +5,37 @@ using UnityEngine.SceneManagement;
 
 namespace Chores
 {
+    public enum PlayModeEnum
+    {
+        SelectArea = 0,
+        AllAreas = 1
+    }
+
     /// <summary>
     /// Abstract base class for all chore minigames.
     /// Defines the common structure and functionality that every chore must implement.
     /// </summary>
     public abstract class Chore : MonoBehaviour
     {
-        public enum PlayModeEnum
-        {
-            SelectArea = 0,
-            AllAreas = 1
-        }
 
         [Header("Chore Configuration")][SerializeField] protected string choreId;
         [SerializeField] protected string choreName;
         [TextArea][SerializeField] protected string choreDescription;
 
-        protected PlayModeEnum _playMode = PlayModeEnum.AllAreas;
-        public PlayModeEnum PlayMode 
-        {
-            get => _playMode;
-            set => _playMode = value;
-        }
+        [SerializeField] protected float choreTimer = 10f;
+        protected float choreCurrentTime;
+        public float ChoreCurrentTime => choreCurrentTime;
 
         protected bool isChoreActive;
+        public bool IsChoreActive => isChoreActive;
         protected float timeElapsed;
         protected float score;
+        public float Score => score;
 
         public UnityEvent onChoreActive = new();
+        public UnityEvent onChoreTimesUp = new();
         public UnityEvent<ChoreStats> onChoreCompleted = new();
         public UnityEvent onChoreEnded = new();
-
-        public UnityEvent<MRUKAnchor> onSelectGameAnchor;
-        protected MRUKAnchor _selectedGameAnchor;
 
 
         /// <summary>
@@ -48,8 +46,6 @@ namespace Chores
             timeElapsed = 0f;
             if (hasPlayedChore) // If this is the first time playing, show a tutorial or introduction
             {
-                isChoreActive = true;
-                timeElapsed = 0f;
                 StarMiniGameChore();
             }
             else
@@ -78,9 +74,9 @@ namespace Chores
         /// <summary>
         /// Gathers performance stats and tells the GameManager the chore is complete.
         /// </summary>
-        public virtual void CompleteChore()
+        public virtual void CompleteChore(bool inTime = true)
         {
-            var choreStats = new ChoreStats(choreId, score, timeElapsed);
+            var choreStats = new ChoreStats(choreId, score, timeElapsed, inTime);
             onChoreCompleted.Invoke(choreStats);
         }
 
@@ -97,6 +93,14 @@ namespace Chores
             if (isChoreActive)
             {
                 timeElapsed += Time.deltaTime;
+
+                choreCurrentTime = choreTimer - timeElapsed;
+                if (timeElapsed > choreTimer)
+                {
+                    choreCurrentTime = 0f;
+                    CompleteChore(false);
+                    onChoreTimesUp.Invoke();
+                }
             }
         }
 
@@ -110,43 +114,29 @@ namespace Chores
         /// </summary>
         public void QuitGame()
         {
+            // ???: unsure if I want this part
+            
             if (isChoreActive)
             {
-                CompleteChore();
+                Reset();
             }
+            
 
+            // go back to main menu
             SceneManager.LoadScene(0);
-        }
-
-        #region Select Game Area
-
-        public virtual void GameAreaSelected(MRUKAnchor anchor)
-        {
-            _playMode = PlayModeEnum.SelectArea;
-
-            _selectedGameAnchor = anchor;
-            onSelectGameAnchor?.Invoke(anchor);
-
-            // NOTE: need to be maintained due to incompatibility issues
-            //xtdAnchorPrefabSpawner.SetGameAnchor(anchor);
-
-            // ???: start game immediately or 3...2...1... then start game
-        }
-
-        public MRUKAnchor GetGameArea()
-        {
-            return _selectedGameAnchor;
         }
 
         public virtual void Reset()
         {
             isChoreActive = false;
             timeElapsed = 0f; // reset timer and chores 
-            // ???: unsure of this
-            _playMode = PlayModeEnum.AllAreas;
-            _selectedGameAnchor = null;
         }
 
-        #endregion
+        public virtual void AddScore(float points)
+        {
+            if (!isChoreActive) return;
+            score += points;
+        }
+
     }
 }
