@@ -11695,7 +11695,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cc5c234723e3a54d8dd09b131117743, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _meshType: 5
+  _meshType: 1
 --- !u!114 &1011580085
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11726,7 +11726,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2609c54f376cffc4da1ab9401cc1a36f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _skeletonType: 5
+  _skeletonType: 1
   _updateRootPose: 0
   _updateRootScale: 1
   _enablePhysicsCapsules: 0
@@ -20908,6 +20908,13 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  choreTimer: 10
+  scoreText: {fileID: 0}
+  timerText: {fileID: 0}
+  onMiniGameStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  autoStart: 0
 --- !u!114 &1752210170
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21000,7 +21007,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  autoStart: 0
+  autoStart: 1
 --- !u!114 &1752210171
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22265,7 +22272,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cc5c234723e3a54d8dd09b131117743, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _meshType: 4
+  _meshType: 0
 --- !u!114 &1853034326
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22296,7 +22303,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2609c54f376cffc4da1ab9401cc1a36f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _skeletonType: 4
+  _skeletonType: 0
   _updateRootPose: 0
   _updateRootScale: 1
   _enablePhysicsCapsules: 0
@@ -26724,7 +26731,7 @@ PrefabInstance:
     - target: {fileID: 7042133912099342453, guid: 946c4bcf5ee78c2438bd71dd2f9fe1f9, type: 3}
       propertyPath: m_spwanMarker
       value: 
-      objectReference: {fileID: 4199183768428282981, guid: 92a5f690e9cda4b45a3d1fc533f75472, type: 3}
+      objectReference: {fileID: 4199183768428282981, guid: 2360b790ac0fec548bba3d0ed87561bb, type: 3}
     - target: {fileID: 7042133912099342453, guid: 946c4bcf5ee78c2438bd71dd2f9fe1f9, type: 3}
       propertyPath: m_uiInference
       value: 
