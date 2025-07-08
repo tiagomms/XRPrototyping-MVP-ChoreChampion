@@ -32,6 +32,7 @@ public class EyeLevelSpawner : MonoBehaviour
 
     private List<GameObject> spawnedObjects = new List<GameObject>();
     private bool hasSpawned = false;
+    private bool discoveryFinished = false;
 
     void Start()
     {
@@ -49,15 +50,18 @@ public class EyeLevelSpawner : MonoBehaviour
             return;
         }
 
-        // Check if scene is already loaded
+        // If MRUK already initialized, spawn immediately
         if (MRUK.Instance.IsInitialized)
         {
+            discoveryFinished = true;
             SpawnObjects();
         }
         else
         {
+            // Wait until MRUK scene is loaded before spawning
             MRUK.Instance.RegisterSceneLoadedCallback(() =>
             {
+                discoveryFinished = true;
                 SpawnObjects();
             });
         }
@@ -65,6 +69,12 @@ public class EyeLevelSpawner : MonoBehaviour
 
     private void SpawnObjects()
     {
+        if (!discoveryFinished)
+        {
+            Debug.LogWarning("EyeLevelSpawner: MRUK initialization not finished, delaying spawn");
+            return;
+        }
+
         if (hasSpawned)
         {
             Debug.LogWarning("EyeLevelSpawner: Objects already spawned, skipping duplicate spawn");
@@ -96,7 +106,7 @@ public class EyeLevelSpawner : MonoBehaviour
 
     private void SpawnInRoom(MRUKRoom room)
     {
-        if (room == null) 
+        if (room == null)
         {
             Debug.LogWarning("Room is null, skipping spawn");
             return;
@@ -110,12 +120,11 @@ public class EyeLevelSpawner : MonoBehaviour
 
         foreach (var prefab in Prefabs)
         {
-            if (prefab == null) 
+            if (prefab == null)
             {
-                Debug.LogWarning("Null prefab found in prefabs list, skipping");
+                Debug.LogWarning("Null prefab found, skipping");
                 continue;
             }
-            
             SpawnPrefabsAtEyeLevel(room, prefab);
         }
     }
@@ -123,10 +132,7 @@ public class EyeLevelSpawner : MonoBehaviour
     private void SpawnPrefabsAtEyeLevel(MRUKRoom room, GameObject prefab)
     {
         var bounds = Utilities.GetPrefabBounds(prefab);
-        float objectRadius = bounds.HasValue
-            ? Mathf.Max(bounds.Value.extents.x, bounds.Value.extents.z)
-            : 0.1f;
-
+        float objectRadius = bounds.HasValue ? Mathf.Max(bounds.Value.extents.x, bounds.Value.extents.z) : 0.1f;
         int successfulSpawns = 0;
 
         for (int n = 0; n < SpawnAmount; n++)
@@ -147,18 +153,13 @@ public class EyeLevelSpawner : MonoBehaviour
 
                 var spawned = Instantiate(prefab, pos, rot, transform);
                 FaceUser(spawned.transform, pos);
-
-                // Track spawned objects
                 spawnedObjects.Add(spawned);
 
-                // Clear selection to prevent Inspector issues
                 #if UNITY_EDITOR
                 if (UnityEditor.Selection.activeGameObject == spawned)
                     UnityEditor.Selection.activeGameObject = null;
                 #endif
 
-                // Register with tutorial - but only register the LAST spawned object
-                // This prevents multiple registrations which could cause issues
                 if (tutorial != null)
                 {
                     tutorial.RegisterInteractable(spawned);
@@ -166,19 +167,18 @@ public class EyeLevelSpawner : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning("EyeLevelSpawner: RegularFoldTutorial reference is missing! Objects spawned but not registered with tutorial.");
+                    Debug.LogWarning("RegularFoldTutorial reference missing, not registering");
                 }
 
                 placed = true;
                 successfulSpawns++;
                 break;
             }
-
             if (!placed)
                 Debug.LogWarning($"{name}: Couldn't place {prefab.name} after {MaxIterations} attempts");
         }
 
-        Debug.Log($"Successfully spawned {successfulSpawns} out of {SpawnAmount} {prefab.name} objects");
+        Debug.Log($"Successfully spawned {successfulSpawns} out of {SpawnAmount} {prefab.name}(s)");
     }
 
     private bool TryGetEyeLevelPosition(MRUKRoom room, float objectRadius, out Vector3 position, out Quaternion rotation)
@@ -186,19 +186,13 @@ public class EyeLevelSpawner : MonoBehaviour
         position = Vector3.zero;
         rotation = Quaternion.identity;
 
-        if (UserTransform == null)
-        {
-            Debug.LogError("UserTransform is null in TryGetEyeLevelPosition");
-            return false;
-        }
-
-        Vector3 up      = UserTransform.up;
+        Vector3 up = UserTransform.up;
         Vector3 forward = UserTransform.forward;
-        Vector3 right   = UserTransform.right;
+        Vector3 right = UserTransform.right;
         Vector3 basePos = UserTransform.position + forward * DistanceFromUser + up * EyeLevelOffset;
 
         Vector3 horOff = right * UnityEngine.Random.Range(-HorizontalSpread, HorizontalSpread);
-        Vector3 verOff = up    * UnityEngine.Random.Range(-VerticalSpread, VerticalSpread);
+        Vector3 verOff = up * UnityEngine.Random.Range(-VerticalSpread, VerticalSpread);
         Vector3 target = basePos + horOff + verOff;
 
         if (UseRoomBounds && room != null && !room.IsPositionInRoom(target))
@@ -207,8 +201,13 @@ public class EyeLevelSpawner : MonoBehaviour
         if (AvoidObstacles)
         {
             float dist = Vector3.Distance(UserTransform.position, target);
-            if (Physics.SphereCast(UserTransform.position, objectRadius, (target - UserTransform.position).normalized,
-                                   out _, dist, ObstacleLayerMask, QueryTriggerInteraction.Ignore))
+            if (Physics.SphereCast(UserTransform.position,
+                                   objectRadius,
+                                   (target - UserTransform.position).normalized,
+                                   out _,
+                                   dist,
+                                   ObstacleLayerMask,
+                                   QueryTriggerInteraction.Ignore))
                 return false;
         }
 
@@ -219,56 +218,36 @@ public class EyeLevelSpawner : MonoBehaviour
 
     private void FaceUser(Transform t, Vector3 pos)
     {
-        if (t == null || UserTransform == null) return;
-        
         var dir = (UserTransform.position - pos).normalized;
         t.rotation = Quaternion.LookRotation(dir, Vector3.up);
     }
 
-    /// <summary>
-    /// Call this from a UI button OnClick to start the tutorial when ready.
-    /// </summary>
     public void OnStartTutorialButton()
     {
         if (tutorial != null)
-        {
             tutorial.StartFoldingTutorial();
-        }
         else
-        {
-            Debug.LogError("No RegularFoldTutorial assigned for OnStartTutorialButton()");
-        }
+            Debug.LogError("No RegularFoldTutorial assigned");
     }
 
-    /// <summary>
-    /// Manually trigger spawning (useful for testing)
-    /// </summary>
     [ContextMenu("Spawn Objects")]
     public void ManualSpawn()
     {
-        if (MRUK.Instance != null && MRUK.Instance.IsInitialized)
+        if (!discoveryFinished)
         {
-            // Reset spawn state to allow manual respawning
-            hasSpawned = false;
-            SpawnObjects();
+            Debug.LogError("Cannot spawn: MRUK initialization not finished.");
+            return;
         }
-        else
-        {
-            Debug.LogError("MRUK is not initialized. Cannot spawn objects.");
-        }
+        hasSpawned = false;
+        SpawnObjects();
     }
 
-    /// <summary>
-    /// Clear all spawned objects
-    /// </summary>
     [ContextMenu("Clear Spawned Objects")]
     public void ClearSpawnedObjects()
     {
         #if UNITY_EDITOR
-        // Clear selection to avoid inspector errors
         UnityEditor.Selection.activeGameObject = null;
         #endif
-        
         foreach (var obj in spawnedObjects)
         {
             if (obj != null)
@@ -277,31 +256,19 @@ public class EyeLevelSpawner : MonoBehaviour
                 if (UnityEditor.Selection.activeGameObject == obj)
                     UnityEditor.Selection.activeGameObject = null;
                 #endif
-                
                 if (Application.isPlaying)
                     Destroy(obj);
                 else
                     DestroyImmediate(obj);
             }
         }
-        
         spawnedObjects.Clear();
         hasSpawned = false;
         Debug.Log("Cleared all spawned objects");
     }
 
-    /// <summary>
-    /// Reset spawner state without destroying objects
-    /// </summary>
-    public void ResetSpawner()
-    {
-        hasSpawned = false;
-        spawnedObjects.Clear();
-    }
-
     private void OnDestroy()
     {
-        // Clean up tracked objects
         spawnedObjects.Clear();
     }
 }
