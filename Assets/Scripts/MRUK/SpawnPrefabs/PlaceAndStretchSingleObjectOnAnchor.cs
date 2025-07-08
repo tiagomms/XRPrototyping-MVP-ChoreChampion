@@ -18,7 +18,7 @@ namespace ChoreChampion.XR.MRUtilityKit
             // Force single object placement
             SpawnAmountPerSurface = 1;
             // Force parenting and stretching
-            parentToAnchor = true;
+            straightPlacement = true;
             allowStretch = true;
 
             // make sure just one entry

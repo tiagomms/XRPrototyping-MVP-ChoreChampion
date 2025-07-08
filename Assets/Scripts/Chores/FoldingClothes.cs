@@ -7,8 +7,6 @@ namespace Chores
 {
     public class FoldingClass : Chore
     {
-        
-        [SerializeField] private float choreTimer = 10f;
         [SerializeField] private TextMeshPro scoreText;
         [SerializeField] private TextMeshProUGUI timerText;
         public UnityEvent onMiniGameStarted = new();
@@ -29,10 +27,12 @@ namespace Chores
             Debug.Log("Starting Example Chore minigame!");
         }
 
-        public override void CompleteChore()
+        public override void CompleteChore(bool inTime = true)
         {
-            base.CompleteChore();
+            base.CompleteChore(inTime);
+
             timerText.gameObject.SetActive(false);
+            
             Debug.Log("Example Chore completed!");
         }
 
@@ -47,10 +47,6 @@ namespace Chores
             base.Update();
             if (!isChoreActive) return;
             timerText.text = Mathf.Floor(choreTimer - timeElapsed).ToString();
-            if (timeElapsed >= choreTimer)
-            {
-                CompleteChore();
-            }
         }
 
         public void AddScore()

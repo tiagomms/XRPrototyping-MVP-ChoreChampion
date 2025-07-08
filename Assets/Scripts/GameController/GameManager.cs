@@ -108,5 +108,10 @@ namespace GameController
         {
             uiController.ShowMainMenuPanel();
         }
+
+        public T GetCurrentChore<T>() where T : Chore
+        {
+            return _currentChore as T; // if cast fails it will return null
+        }
     }
 }

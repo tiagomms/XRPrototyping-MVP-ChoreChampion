@@ -25,14 +25,27 @@ namespace ChoreChampion.XR.MRUtilityKit
         /// </summary>
         public struct Surface
         {
+            public string ID;
             public MRUKAnchor Anchor;
             public float UsableArea;
             public bool IsPlane;
             public Rect Bounds;
             public Matrix4x4 Transform;
 
-            // BONUS: Great for spawning objects on surfaces
-            public int AmountSpawnedObjects;
+            public bool Equals(Surface other)
+            {
+                return ID == other.ID; // reference equality, may be fragile
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is Surface other && Equals(other);
+            }
+
+            public override int GetHashCode()
+            {
+                return ID != null ? ID.GetHashCode() : 0;
+            }
         }
 
         /// <summary>
@@ -181,6 +194,7 @@ namespace ChoreChampion.XR.MRUtilityKit
                         totalUsableSurfaceArea += usableArea;
                         surfaces.Add(new()
                         {
+                            ID = Guid.NewGuid().ToString(),
                             Anchor = anchor,
                             UsableArea = usableArea,
                             IsPlane = false,
@@ -221,6 +235,7 @@ namespace ChoreChampion.XR.MRUtilityKit
                         totalUsableSurfaceArea += usableArea;
                         surfaces.Add(new()
                         {
+                            ID = Guid.NewGuid().ToString(),
                             Anchor = anchor,
                             UsableArea = usableArea,
                             IsPlane = true,
@@ -280,7 +295,7 @@ namespace ChoreChampion.XR.MRUtilityKit
             Vector3 localPosition = surface.Transform.inverse.MultiplyPoint3x4(testPosition);
             //Vector3 localPosition = anchor.transform.InverseTransformPoint(testPosition);
 
-            Debug.Log($"[{nameof(GetClosestPositionToSurface)}] - Anchor: {anchor.name}, HasVolumeBound {anchor.VolumeBounds.HasValue}, HasPlaneBound {anchor.PlaneRect.HasValue}, WorldPosition {testPosition}, LocalPosition {localPosition}, normal {normal}, localOffset: {localOffset}");
+            //Debug.Log($"[{nameof(GetClosestPositionToSurface)}] - Anchor: {anchor.name}, HasVolumeBound {anchor.VolumeBounds.HasValue}, HasPlaneBound {anchor.PlaneRect.HasValue}, WorldPosition {testPosition}, LocalPosition {localPosition}, normal {normal}, localOffset: {localOffset}");
             if (anchor.VolumeBounds.HasValue) // is volume
             {
                 // bounds with minimum distance to edge included (for easier calculations)
@@ -291,8 +306,8 @@ namespace ChoreChampion.XR.MRUtilityKit
                 // Clamp to rect by default (safe fallback)
                 Vector2 clamped2D;
 
-                Debug.Log($"[{nameof(GetClosestPositionToSurface)}] - Volume Start Bounds: {surfaceBounds}");
-                Debug.Log($"[{nameof(GetClosestPositionToSurface)}] - Volume Start initial values: local2D - {local2D}");
+                //Debug.Log($"[{nameof(GetClosestPositionToSurface)}] - Volume Start Bounds: {surfaceBounds}");
+                //Debug.Log($"[{nameof(GetClosestPositionToSurface)}] - Volume Start initial values: local2D - {local2D}");
 
 
                 // Resolve snapping behavior
@@ -345,10 +360,10 @@ namespace ChoreChampion.XR.MRUtilityKit
                 Vector2 dirToCenter = (center2D - local2D).normalized;
 
                 int forwardDir = dirToCenter.y >= 0f ? 1 : -1;
-                
+
                 // NOTE: couldn't make it to work to go right by default, so we do it based on dirToCenter.x
                 int rightDir = dirToCenter.x >= 0f ? 1 : -1;
-                
+
                 // ???: part of code always go to the right is not working
                 /*
                 // corner needs to always to go towards the center
@@ -368,7 +383,7 @@ namespace ChoreChampion.XR.MRUtilityKit
                 Vector2 offsetAxis = new(rightDir, forwardDir);
 
                 Vector2 auxOffset = localOffset != null ? (Vector2)localOffset : Vector2.zero;
-                Vector2 offset = new (auxOffset.x * offsetAxis.x, auxOffset.y * offsetAxis.y);
+                Vector2 offset = new(auxOffset.x * offsetAxis.x, auxOffset.y * offsetAxis.y);
 
                 clamped2D += offset;
 
@@ -386,8 +401,8 @@ namespace ChoreChampion.XR.MRUtilityKit
                     {
                         clampedY = Mathf.Clamp(clamped2D.y, surfaceBounds.xMin, surfaceBounds.xMax);
                     }
-                    
-                    clamped2D = new ( clampedX, clampedY );
+
+                    clamped2D = new(clampedX, clampedY);
                 }
 
                 // Rebuild world position from local 2D
@@ -399,7 +414,7 @@ namespace ChoreChampion.XR.MRUtilityKit
 
                 mappedPosition = clamped2D;
 
-                Debug.Log($"[{nameof(GetClosestPositionToSurface)}] - Volume Result: clamped2D - {mappedPosition}, closestPosition {closestPosition}, distance {candidateDistance}");
+                //Debug.Log($"[{nameof(GetClosestPositionToSurface)}] - Volume Result: clamped2D - {mappedPosition}, closestPosition {closestPosition}, distance {candidateDistance}");
 
                 // ???: unsure this is correct - not tested/not important
                 //if (volumeBounds.Contains(localPosition))
