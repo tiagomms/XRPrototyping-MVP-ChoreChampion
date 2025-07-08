@@ -7,12 +7,38 @@ namespace UI
 {
     public abstract class BaseUI : MonoBehaviour
     {
-        [SerializeField] protected GameObject uiObject;
+        
+        [SerializeField, Tooltip("Manager reference to go back.")]
+        protected BaseUIManager uiManager;
+        [SerializeField, Tooltip("Change it if a parent is the UI object.")]
+        protected GameObject uiObject;
         [SerializeField] protected Button backButton;
-        protected GameObject _obj;
+
+        /// <summary>
+        /// Set default uiManager and uiObject values if both are null
+        /// User is welcome to change
+        /// </summary>
+        protected virtual void OnValidate()
+        {
+            Validate();
+        }
+
+        private void Validate()
+        {
+            if (uiManager == null)
+            {
+                uiManager = FindFirstObjectByType<BaseUIManager>();
+            }
+
+            if (uiObject == null)
+            {
+                uiObject = gameObject;
+            }
+        }
+
         protected virtual void Awake()
         {
-            _obj = uiObject != null ? uiObject : gameObject;
+            Validate();
         }
 
         protected virtual void OnEnable()
@@ -32,22 +58,22 @@ namespace UI
 
         public virtual void Show(Action onShown = null)
         {
-            _obj.SetActive(true);
+            uiObject.SetActive(true);
             onShown?.Invoke();
         }
 
         public virtual void Hide(Action onHide = null)
         {
             onHide?.Invoke();
-            _obj.SetActive(false);
+            uiObject.SetActive(false);
         }
 
         [Button]
         public virtual void GoBack()
         {
-            if (BaseUIManager.Instance != null)
+            if (uiManager != null)
             {
-                BaseUIManager.Instance.GoBack();
+                uiManager.GoBack();
             }
         }
     }

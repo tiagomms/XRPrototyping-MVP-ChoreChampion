@@ -8,8 +8,6 @@ namespace UI
     /// </summary>
     public class BaseUIManager : MonoBehaviour
     {
-        public static BaseUIManager Instance { get; protected set; }
-
         [Header("Assign all UI panels here (Main Menu should be first)")]
         [SerializeField] private List<BaseUI> uiPanels = new List<BaseUI>();
         public List<BaseUI> UiPanels => uiPanels;
@@ -24,17 +22,6 @@ namespace UI
         private BaseUI currentUI;
 
         private bool isPausing;
-
-        protected virtual void Awake()
-        {
-            // If an instance already exists and it's not this, destroy this object
-            if (Instance != null && Instance != this)
-            {
-                Destroy(gameObject);
-                return;
-            }
-            Instance = this;
-        }
 
         private void Start()
         {

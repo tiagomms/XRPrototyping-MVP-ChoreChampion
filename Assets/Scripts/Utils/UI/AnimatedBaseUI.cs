@@ -11,13 +11,15 @@ namespace UI
     {
         protected CanvasGroup _canvasGroup;
         [Header("Animation")]
+        [SerializeField] protected bool doFadeInAnimation = true;
+        [SerializeField] protected bool doFadeOutAnimation = true;
         [SerializeField] protected float showAnimDuration = 0.5f;
         [SerializeField] protected float hideAnimDuration = 0.2f;
 
         protected override void Awake()
         {
             base.Awake();
-            _canvasGroup = _obj.GetComponentInChildren<CanvasGroup>();
+            _canvasGroup = uiObject.GetComponentInChildren<CanvasGroup>();
         }
 
         /// <summary>
@@ -26,9 +28,9 @@ namespace UI
         /// <param name="onShown">Callback after shown (after fade if used).</param>
         public override void Show(Action onShown = null)
         {
-            if (_obj.activeSelf) return;
-            _obj.SetActive(true);
-            if (_canvasGroup != null)
+            if (uiObject.activeSelf) return;
+            uiObject.SetActive(true);
+            if (_canvasGroup != null && doFadeInAnimation)
             {
                 _canvasGroup.alpha = 0f;
                 _canvasGroup.DOFade(1f, showAnimDuration)
@@ -47,8 +49,8 @@ namespace UI
         /// <param name="onHide">Callback after hidden (after fade if used).</param>
         public override void Hide(Action onHide = null)
         {
-            if (!_obj.activeSelf) return;
-            if (_canvasGroup != null)
+            if (!uiObject.activeSelf) return;
+            if (_canvasGroup != null && doFadeOutAnimation)
             {
                 _canvasGroup.DOFade(0f, hideAnimDuration)
                     .SetEase(Ease.InOutSine)
