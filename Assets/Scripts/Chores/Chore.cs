@@ -11,7 +11,7 @@ namespace Chores
     /// </summary>
     public abstract class Chore : MonoBehaviour
     {
-        public enum PlayMode
+        public enum PlayModeEnum
         {
             SelectArea = 0,
             AllAreas = 1
@@ -21,11 +21,12 @@ namespace Chores
         [SerializeField] protected string choreName;
         [TextArea][SerializeField] protected string choreDescription;
 
-        protected PlayMode _playMode = PlayMode.AllAreas;
-
-        // Singleton instance
-        public static Chore Instance { get; protected set; }
-
+        protected PlayModeEnum _playMode = PlayModeEnum.AllAreas;
+        public PlayModeEnum PlayMode 
+        {
+            get => _playMode;
+            set => _playMode = value;
+        }
 
         protected bool isChoreActive;
         protected float timeElapsed;
@@ -121,7 +122,7 @@ namespace Chores
 
         public virtual void GameAreaSelected(MRUKAnchor anchor)
         {
-            _playMode = PlayMode.SelectArea;
+            _playMode = PlayModeEnum.SelectArea;
 
             _selectedGameAnchor = anchor;
             onSelectGameAnchor?.Invoke(anchor);
@@ -142,7 +143,8 @@ namespace Chores
             isChoreActive = false;
             timeElapsed = 0f; // reset timer and chores 
             // ???: unsure of this
-            _playMode = PlayMode.AllAreas;
+            _playMode = PlayModeEnum.AllAreas;
+            _selectedGameAnchor = null;
         }
 
         #endregion

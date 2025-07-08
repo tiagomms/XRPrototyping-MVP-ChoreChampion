@@ -6,7 +6,7 @@ using NaughtyAttributes;
 
 namespace LastOfDust.UI
 {
-    public class LodSelectGameTypeUI : BaseUI
+    public class Lod02SelectGameTypeUI : BaseUI
     {
         [Header("UI")]
 
@@ -15,7 +15,7 @@ namespace LastOfDust.UI
 
 
         [Header("Next")]
-        [SerializeField] private LodSurfaceSelectionScreenUI surfaceSelectionUiScreen;
+        [SerializeField] private Lod03SurfaceSelectionScreenUI surfaceSelectionUiScreen;
 
         protected override void OnEnable()
         {
@@ -46,14 +46,16 @@ namespace LastOfDust.UI
         [Button]
         private void OnStartDeepCleanGameMode()
         {
+            BaseUIManager.Instance.HideCurrentPanel();
+
             LastOfDustChore.Instance.StartChore(true);
         }
 
         [Button]
         private void OnSurfaceSelection()
         {
-            //LastOfDustChore.Instance.StartChore(true);
             BaseUIManager.Instance.GoTo(surfaceSelectionUiScreen);
+            LastOfDustChore.Instance.InitializeSurfaceSelection();
         }
     }
 }

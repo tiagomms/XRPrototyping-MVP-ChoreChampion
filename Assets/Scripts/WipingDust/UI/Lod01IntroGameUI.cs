@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace LastOfDust.UI
 {
-    public class LodIntroGameUI : BaseUI
+    public class Lod01IntroGameUI : BaseUI
     {
         [Header("UI")]
         [SerializeField] private Button startGame;
@@ -15,7 +15,7 @@ namespace LastOfDust.UI
 
 
         [Header("Next")]
-        [SerializeField] private LodSelectGameTypeUI selectGameTypeScreen;
+        [SerializeField] private Lod02SelectGameTypeUI selectGameTypeScreen;
 
         protected override void OnEnable()
         {

@@ -3074,6 +3074,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2041377167}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &251537016
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 251537017}
+  m_Layer: 0
+  m_Name: 05-EndGameUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &251537017
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 251537016}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2138824866}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &251571326
 GameObject:
   m_ObjectHideFlags: 0
@@ -6968,6 +6999,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   xtdAnchorPrefabSpawner: {fileID: 1092795428}
+  tapAnchorMechanism: {fileID: 1409004867}
+  randomMonsterSpawner: {fileID: 2111625131}
 --- !u!1 &605470458
 GameObject:
   m_ObjectHideFlags: 0
@@ -23980,6 +24013,7 @@ MonoBehaviour:
   - {fileID: 1354297986}
   - {fileID: 1418813877}
   - {fileID: 1088566231}
+  pausePanel: {fileID: 0}
 --- !u!4 &2044500700
 Transform:
   m_ObjectHideFlags: 0
@@ -25368,6 +25402,7 @@ Transform:
   - {fileID: 1354297985}
   - {fileID: 1418813876}
   - {fileID: 1088566230}
+  - {fileID: 251537017}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2140202366
@@ -25499,7 +25534,7 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 400354699}
+  - {fileID: 192109646}
   - {fileID: 761911557}
   - {fileID: 2138824866}
-  - {fileID: 192109646}
   - {fileID: 236691797}

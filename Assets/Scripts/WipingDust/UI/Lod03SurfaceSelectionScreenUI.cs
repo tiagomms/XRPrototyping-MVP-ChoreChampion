@@ -11,7 +11,7 @@ using Meta.WitAi.CallbackHandlers;
 
 namespace LastOfDust.UI
 {
-    public class LodSurfaceSelectionScreenUI : BaseUI
+    public class Lod03SurfaceSelectionScreenUI : BaseUI
     {
         [Header("Anchor Buttons")]
         [SerializeField] private PlaceAndStretchSingleObjectOnAnchor tapAnchorMechanism;
@@ -19,29 +19,34 @@ namespace LastOfDust.UI
         [Header("Next")]
         [SerializeField] private BaseUI nextUiScreen;
 
-        private Dictionary<InteractableUnityEventWrapper, MRUKSpawnedObject> spawnedUiInteractables = new();
+        private Dictionary<InteractableUnityEventWrapper, MRUKSpawnedObject> _spawnedUiInteractables = new();
+
+        protected override void Awake()
+        {
+            base.Awake();
+            tapAnchorMechanism.onSpawned.AddListener(InitializeSurfacePokeInteractables);
+        }
+
+        protected virtual void OnDestroy()
+        {
+            tapAnchorMechanism.onSpawned.RemoveListener(InitializeSurfacePokeInteractables);
+        }
 
         protected override void OnEnable()
         {
             base.OnEnable();
-            if (tapAnchorMechanism != null)
+            
+            // Check if spawning has already occurred when this UI is enabled
+            if (tapAnchorMechanism.HasSpawned())
             {
-                tapAnchorMechanism.onSpawned.AddListener(InitializeSurfacePokeInteractables);
-            }
-        }
-
-        protected override void OnDisable()
-        {
-            base.OnDisable();
-            if (tapAnchorMechanism != null)
-            {
-                tapAnchorMechanism.onSpawned.RemoveListener(InitializeSurfacePokeInteractables);
+                InitializeSurfacePokeInteractables();
             }
         }
 
         private void InitializeSurfacePokeInteractables()
         {
-            int childCount = tapAnchorMechanism.transform.childCount;
+            // create list of interactables
+            int childCount = tapAnchorMechanism.GetSpawnedObjectCount();
             for (int i = 0; i < childCount; i++)
             {
                 Transform obj = tapAnchorMechanism.transform.GetChild(i);
@@ -51,7 +56,7 @@ namespace LastOfDust.UI
 
                 if (spawnedObject != null && interactable != null)
                 {
-                    spawnedUiInteractables.Add(interactable, spawnedObject);
+                    _spawnedUiInteractables.Add(interactable, spawnedObject);
                 }
             }
 
@@ -63,11 +68,16 @@ namespace LastOfDust.UI
             // ???: will there be a button to select or go straight to game. right now straight to game.
             DisableInteractables();
             LastOfDustChore.Instance.GameAreaSelected(value.Anchor);
+            tapAnchorMechanism.ClearSpawnedObjects();
+            // TODO: 3...2...1... Initialize game
+            BaseUIManager.Instance.HideCurrentPanel();
+
+            LastOfDustChore.Instance.StartChore(true);
         }
 
         private void EnableInteractables()
         {
-            foreach (var item in spawnedUiInteractables)
+            foreach (var item in _spawnedUiInteractables)
             {
                 item.Key.WhenSelect.AddListener(() => GameAnchorSelected(item.Value));
             }
@@ -75,13 +85,17 @@ namespace LastOfDust.UI
 
         private void DisableInteractables()
         {
-            foreach (var item in spawnedUiInteractables)
+            foreach (var item in _spawnedUiInteractables)
             {
                 item.Key.WhenSelect.RemoveListener(() => GameAnchorSelected(item.Value));
             }
         }
 
-
+        public override void GoBack()
+        {
+            LastOfDustChore.Instance.Reset();
+            base.GoBack();
+        }
 
     }
 }
