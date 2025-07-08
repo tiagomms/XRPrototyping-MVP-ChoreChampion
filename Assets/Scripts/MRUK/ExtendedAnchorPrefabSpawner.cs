@@ -108,6 +108,11 @@ namespace ChoreChampion.XR.MRUtilityKit
             }
         }
 
+        public void ClearRoomPrefabs(MRUKRoom room)
+        {
+            ClearPrefabs(room);
+        }
+
 
     }
 }

@@ -155,6 +155,9 @@ namespace ChoreChampion.XR.MRUtilityKit
         public Dictionary<MRUKAnchor, AnchorSurfaceData> AnchorsSurfaceData => _anchorsSurfaceData;
 
         public UnityEvent onSpawned;
+
+        
+        public UnityEvent onSpawnedObjectKilled;
         public UnityEvent onSurfaceCleaned;
         public UnityEvent onAnchorCleaned;
         public UnityEvent onRoomCleaned;
@@ -293,6 +296,11 @@ namespace ChoreChampion.XR.MRUtilityKit
         [Button]
         public virtual void SpawnOnGameAnchor()
         {
+            SpawnOnAnchor(_gameAnchor);
+        }
+
+        public virtual void SpawnOnAnchor(MRUKAnchor anchor)
+        {
             if (MRUK.Instance && MRUK.Instance.IsInitialized)
             {
                 var currentRoom = MRUK.Instance.GetCurrentRoom();
@@ -302,7 +310,7 @@ namespace ChoreChampion.XR.MRUtilityKit
                     return;
                 }
 
-                SpawnObjectsInGameAnchor(currentRoom, _gameAnchor);
+                SpawnObjectsInGameAnchor(currentRoom, anchor);
                 onSpawned?.Invoke();
             }
             else
@@ -655,14 +663,11 @@ namespace ChoreChampion.XR.MRUtilityKit
         /// <returns>True to continue spawning, false to stop (for moving existing objects).</returns>
         protected virtual bool InstantiateOrMoveObject(MRUKAnchor anchor, MRUKExtension.Surface surface, Vector3 spawnPosition, Quaternion spawnRotation)
         {
-            // Instantiate new object
+            // Instantiate new object - temporarily under anchor parent
             Transform tempParentTransform = GetAnchorGameObjectTransform(anchor);
-            //Transform tempParentTransform = neatPlacement ? GetAnchorGameObjectTransform(anchor) : transform;
             GameObject spawnedObject = Instantiate(SpawnObject, spawnPosition, spawnRotation, tempParentTransform);
 
-            // TODO: instead I might have a boolean called neatPlacement - if true, does this, and place initially all objects as childs of the anchor
-            // then as childs of our object
-            // When parenting to anchor, set local rotation to identity (inherits anchor's rotation)
+            // the reason is to be able to have straight rotations in the anchor itself - if needed through this boolean 
             if (straightPlacement)
             {
                 spawnedObject.transform.localRotation = RoundRotationToNearest90Degrees(spawnedObject.transform.localRotation);
@@ -674,19 +679,24 @@ namespace ChoreChampion.XR.MRUtilityKit
                 spawnedObject.transform.localScale = Vector3.one;
             }
 
-            // becomes child of this object for easier tracking (and no need for dictionary - I think)
+            // becomes child of spawner object for easier tracking
             spawnedObject.transform.SetParent(transform);
 
+
+            /// MRUKSpawnedObject
+            // Lastly - Get/Add this component for actual object tracking with events
             MRUKSpawnedObject mrukSpawnedObject = spawnedObject.GetComponent<MRUKSpawnedObject>();
             if (mrukSpawnedObject == null)
             {
                 mrukSpawnedObject = spawnedObject.AddComponent<MRUKSpawnedObject>();
             }
-            //Debug.Log($"MRUKSpawnedObject: {mrukSpawnedObject?.ID}");
-
+            // initialize with anchor and surface info
             mrukSpawnedObject.Initialize(anchor, surface);
 
-            CountSpawnedObject(mrukSpawnedObject);
+            // add to dictionary
+            AddSpawnedObject(mrukSpawnedObject);
+
+            // on destroyed - remove it
             mrukSpawnedObject.onDestroyed.AddListener(RemoveSpawnedObject);
             return true;
         }
@@ -698,7 +708,7 @@ namespace ChoreChampion.XR.MRUtilityKit
             return parentIdentifier.transform ?? anchorGameObject.transform;
         }
 
-        private void CountSpawnedObject(MRUKSpawnedObject arg0)
+        private void AddSpawnedObject(MRUKSpawnedObject arg0)
         {
             _anchorsSurfaceData[arg0.Anchor].SpawnedObjectsPerSurface[arg0.Surface].Add(arg0);
         }
@@ -709,7 +719,7 @@ namespace ChoreChampion.XR.MRUtilityKit
             var spawnedOnSurface = surfaceData.SpawnedObjectsPerSurface[arg0.Surface];
             spawnedOnSurface.Remove(arg0);
 
-            // 
+            onSpawnedObjectKilled.Invoke();
             if (IsRoomClear())
             {
                 Debug.Log($"----- Entire Room Clean -----");
