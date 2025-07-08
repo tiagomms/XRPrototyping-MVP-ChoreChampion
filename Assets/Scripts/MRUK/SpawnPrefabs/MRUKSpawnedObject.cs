@@ -27,9 +27,18 @@ namespace ChoreChampion.XR.MRUtilityKit
             onInitialized?.Invoke(this);
         }
 
-        public virtual void Delete(GameObject obj = null)
+        /// <summary>
+        /// Deletes the object without triggering the onDestroyed event.
+        /// Useful for batch operations to avoid collection modification errors.
+        /// </summary>
+        /// <param name="obj">Object to destroy, or null to destroy this GameObject.</param>
+        /// <param name="triggerEvent">Whether to trigger the onDestroyed event.</param>
+        public virtual void Delete(GameObject obj = null, bool triggerEvent = true)
         {
-            onDestroyed?.Invoke(this);
+            if (triggerEvent)
+            {
+                onDestroyed?.Invoke(this);
+            }
             Destroy(obj != null ? obj : gameObject);
         }
 

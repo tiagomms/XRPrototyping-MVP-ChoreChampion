@@ -37,6 +37,24 @@ namespace ChoreChampion.XR.MRUtilityKit
             {
                 return SpawnedObjectsPerSurface.Keys.ToList();
             }
+
+            public readonly void ClearSpawnedObjectsInAnchor()
+            {
+                foreach (var surfaceSpawnObjs in SpawnedObjectsPerSurface)
+                {
+                    // Create a copy of the HashSet to avoid modification during enumeration
+                    var objectsToDelete = surfaceSpawnObjs.Value.ToList();
+                    foreach (var spObj in objectsToDelete)
+                    {
+                        spObj.Delete(); // This will trigger onDestroyed and remove from HashSet
+                    }
+                }
+            }
+
+            public readonly int TotalSpawnedObjectsInAnchor()
+            {
+                return SpawnedObjectsPerSurface.Values.Select(a => a.Count).Sum();
+            }
         }
 
         /// <summary>
@@ -738,5 +756,37 @@ namespace ChoreChampion.XR.MRUtilityKit
             return Quaternion.Euler(roundedX, roundedY, roundedZ);
         }
 
+        /// <summary>
+        /// Checks if spawning has already occurred by looking at the transform's child count.
+        /// Useful for scripts that might be enabled after spawning has already happened.
+        /// </summary>
+        /// <returns>True if objects have been spawned, false otherwise.</returns>
+        public virtual bool HasSpawned()
+        {
+            if (_anchorsSurfaceData == null) return false;
+            // checks if any anchor is not clear (has prefabs inside)
+            return _anchorsSurfaceData.Values.Any(a => !a.IsAnchorClear());
+            //return transform.childCount > 0;
+        }
+
+        /// <summary>
+        /// Gets the number of spawned objects.
+        /// </summary>
+        /// <returns>Number of spawned objects.</returns>
+        public virtual int GetSpawnedObjectCount()
+        {
+            if (_anchorsSurfaceData == null) return 0;
+            // sums all anchors total
+            return _anchorsSurfaceData.Values.Sum(a => a.TotalSpawnedObjectsInAnchor());
+            //return transform.childCount;
+        }
+
+        [Button]
+        public virtual void ClearSpawnedObjects()
+        {
+            if (_anchorsSurfaceData == null) return;
+            
+            _anchorsSurfaceData.Values.ToList().ForEach(a => a.ClearSpawnedObjectsInAnchor());
+        }
     }
 }
