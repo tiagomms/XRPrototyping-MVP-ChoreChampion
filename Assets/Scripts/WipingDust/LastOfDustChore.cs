@@ -22,6 +22,18 @@ namespace Chores
         [Header("Other settings")]
         [SerializeField] private bool removeMonstersOnTimesUp = true;
 
+        [Header("UI")]
+        [SerializeField] private Lod01IntroGameUI startMenu;
+        [SerializeField] private Lod02SelectGameTypeUI selectGameTypeMenu;
+        [SerializeField] private Lod03SurfaceSelectionScreenUI selectSurfaceMenu;
+        [SerializeField] private Lod04HudInGameUI inGameUI;
+        [SerializeField] private Lod05EndGameUI endGameUI;
+        
+        [Space]
+        [SerializeField] private BaseUIManager uiManager;
+
+
+
         // Singleton instance
         public static LastOfDustChore Instance { get; protected set; }
 
@@ -54,20 +66,20 @@ namespace Chores
 
         protected virtual void Start()
         {
-            randomMonsterSpawner.onSurfaceCleaned.AddListener(OnSurfaceCleaned);
-            randomMonsterSpawner.onAnchorCleaned.AddListener(OnAnchorCleaned);
+            //randomMonsterSpawner.onSurfaceCleaned.AddListener(OnSurfaceCleaned);
+            //randomMonsterSpawner.onAnchorCleaned.AddListener(OnAnchorCleaned);
             randomMonsterSpawner.onRoomCleaned.AddListener(OnRoomCleaned);
 
-            onChoreTimesUp.AddListener(MonsterCleanUp);
+            onChoreTimesUp.AddListener(OnTimesUp);
         }
 
         protected virtual void OnDestroy()
         {
-            randomMonsterSpawner.onSurfaceCleaned.RemoveListener(OnSurfaceCleaned);
-            randomMonsterSpawner.onAnchorCleaned.RemoveListener(OnAnchorCleaned);
+            //randomMonsterSpawner.onSurfaceCleaned.RemoveListener(OnSurfaceCleaned);
+            //randomMonsterSpawner.onAnchorCleaned.RemoveListener(OnAnchorCleaned);
             randomMonsterSpawner.onRoomCleaned.RemoveListener(OnRoomCleaned);
 
-            onChoreTimesUp.RemoveListener(MonsterCleanUp);
+            onChoreTimesUp.RemoveListener(OnTimesUp);
         }
 
         protected override void StartTutorial()
@@ -111,34 +123,31 @@ namespace Chores
         }
 
 
-        #region Game Logic
+        #region 01-Start Menu
+        public void SelectGameTypeScreen()
+        {
+            uiManager.GoTo(selectGameTypeMenu);
+        }
+        #endregion
+
+        #region 02-Select Game Type
+
+        public void StartDeepCleanGameMode()
+        {
+            _playMode = PlayModeEnum.AllAreas;
+            uiManager.GoTo(inGameUI);
+            StartChore(true);
+        }
+
+
         public void InitializeSurfaceSelection()
         {
+            uiManager.GoTo(selectSurfaceMenu);
             tapAnchorMechanism.SpawnOnAllAnchors();
         }
 
-        private void OnSurfaceCleaned()
-        {
-            Debug.Log($"[{nameof(LastOfDustChore)}] - {nameof(OnSurfaceCleaned)}");
-        }
-
-        private void OnAnchorCleaned()
-        {
-            Debug.Log($"[{nameof(LastOfDustChore)}] - {nameof(OnAnchorCleaned)}");
-        }
-
-        private void OnRoomCleaned()
-        {
-            Debug.Log($"[{nameof(LastOfDustChore)}] - {nameof(OnRoomCleaned)}");
-            var uiManager = BaseUIManager.Instance;
-
-            // get the last one - should be the end menu
-            // ???: use a int to state the last 
-            CompleteChore();
-        }
-
         #endregion
-        #region Select Game Area
+        #region 03-Select Game Area
 
         public virtual void GameAreaSelected(MRUKAnchor anchor)
         {
@@ -150,6 +159,15 @@ namespace Chores
             // NOTE: need to be maintained due to incompatibility issues
             xtdAnchorPrefabSpawner.SetGameAnchor(anchor);
 
+
+            // clear spawned objects
+            tapAnchorMechanism.ClearSpawnedObjects();
+
+            // TODO: 3...2...1... Initialize game
+            uiManager.GoTo(inGameUI);
+
+            StartChore(true);
+
             // ???: start game immediately or 3...2...1... then start game
         }
 
@@ -158,12 +176,49 @@ namespace Chores
             return _selectedGameAnchor;
         }
 
-        private void MonsterCleanUp()
+        #endregion
+
+        #region 04-InGame
+
+        private void OnRoomCleaned()
         {
+            Debug.Log($"[{nameof(LastOfDustChore)}] - {nameof(OnRoomCleaned)}");
+
+            // get the last one - should be the end menu
+            CompleteChore(true);
+            uiManager.GoTo(endGameUI);
+        }
+
+        private void OnTimesUp()
+        {
+            Debug.Log($"[{nameof(LastOfDustChore)}] - {nameof(OnTimesUp)}");
+
+            // clear monsters if intended
             if (removeMonstersOnTimesUp)
             {
                 randomMonsterSpawner.ClearSpawnedObjects();
             }
+
+            // no need to CompleteChore - already done in base Chore - set to false
+
+            // go to endGameUI
+            uiManager.GoTo(endGameUI);
+        }
+
+        #endregion
+
+        #region 05-EndGame
+
+        public void RestartGame()
+        {
+            Reset();
+            uiManager.ResetAndGoTo(0);
+        }
+
+        public void RestartOnSelectSurface()
+        {
+            RestartGame();
+            InitializeSurfaceSelection();
         }
 
         #endregion

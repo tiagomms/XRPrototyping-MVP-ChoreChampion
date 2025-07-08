@@ -3120,7 +3120,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 509ab12e0ba50b248b473e52296f4a91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiObject: {fileID: 0}
+  uiManager: {fileID: 2044500699}
+  uiObject: {fileID: 251537016}
   backButton: {fileID: 0}
   retryButton: {fileID: 0}
   reanchorSurfaceButton: {fileID: 0}
@@ -7058,6 +7059,13 @@ MonoBehaviour:
   xtdAnchorPrefabSpawner: {fileID: 1092795428}
   tapAnchorMechanism: {fileID: 1409004867}
   randomMonsterSpawner: {fileID: 2111625131}
+  removeMonstersOnTimesUp: 1
+  startMenu: {fileID: 1354297986}
+  selectGameTypeMenu: {fileID: 1418813877}
+  selectSurfaceMenu: {fileID: 1088566231}
+  inGameUI: {fileID: 2075280918}
+  endGameUI: {fileID: 251537018}
+  uiManager: {fileID: 2044500699}
   onSelectGameAnchor:
     m_PersistentCalls:
       m_Calls: []
@@ -12008,7 +12016,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0aa09354336cf494c9e11aac0510fba1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiObject: {fileID: 0}
+  uiManager: {fileID: 2044500699}
+  uiObject: {fileID: 1088566229}
   backButton: {fileID: 0}
   tapAnchorMechanism: {fileID: 1409004867}
   nextUiScreen: {fileID: 2075280918}
@@ -15394,11 +15403,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67336a58937d5eb4a98e86f7a407a667, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiObject: {fileID: 0}
+  uiManager: {fileID: 2044500699}
+  uiObject: {fileID: 1354297984}
   backButton: {fileID: 0}
   startGame: {fileID: 0}
   quitGame: {fileID: 0}
-  selectGameTypeScreen: {fileID: 1418813877}
 --- !u!1 &1355758084
 GameObject:
   m_ObjectHideFlags: 0
@@ -15931,7 +15940,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f6c4581bd7195143acad17f8f78f0b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiObject: {fileID: 0}
+  uiManager: {fileID: 2044500699}
+  uiObject: {fileID: 1418813875}
   backButton: {fileID: 0}
   surfaceCleanMode: {fileID: 0}
   deepCleanMode: {fileID: 0}
@@ -24515,7 +24525,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eac7e9f04bf52d946a2f289f7155851f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiObject: {fileID: 0}
+  uiManager: {fileID: 2044500699}
+  uiObject: {fileID: 2075280916}
   backButton: {fileID: 0}
   timerText: {fileID: 0}
   scoreText: {fileID: 0}

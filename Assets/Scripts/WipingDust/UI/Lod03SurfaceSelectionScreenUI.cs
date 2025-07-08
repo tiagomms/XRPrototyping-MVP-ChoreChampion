@@ -67,15 +67,9 @@ namespace LastOfDust.UI
             // ???: will there be a button to select or go straight to game. right now straight to game.
             DisableInteractables();
             LastOfDustChore.Instance.GameAreaSelected(value.Anchor);
-            tapAnchorMechanism.ClearSpawnedObjects();
-            
-            // TODO: 3...2...1... Initialize game
-            BaseUIManager.Instance.GoTo(nextUiScreen);
-
-            LastOfDustChore.Instance.StartChore(true);
         }
 
-        private void EnableInteractables()
+        public void EnableInteractables()
         {
             foreach (var item in _spawnedUiInteractables)
             {
@@ -83,7 +77,7 @@ namespace LastOfDust.UI
             }
         }
 
-        private void DisableInteractables()
+        public void DisableInteractables()
         {
             foreach (var item in _spawnedUiInteractables)
             {

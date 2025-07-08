@@ -30,25 +30,7 @@ namespace LastOfDust.UI
             if (LastOfDustChore.Instance == null) return;
             UpdateTimer(LastOfDustChore.Instance.ChoreCurrentTime);
             UpdateScore(LastOfDustChore.Instance.Score);
-
-            LastOfDustChore.Instance.onChoreCompleted.AddListener(GameStop);
         }
-
-        protected override void OnDisable()
-        {
-            base.OnDisable();
-            if (LastOfDustChore.Instance == null) return;
-
-            LastOfDustChore.Instance.onChoreCompleted.RemoveListener(GameStop);
-        }
-
-        private void GameStop(ChoreStats arg0)
-        {
-            // ???: unsure here - should I disappear? - my stack does not allow me to exist along the end screen
-            BaseUIManager.Instance.GoTo(next);
-
-        }
-
         public void UpdateTimer(float newTime)
         {
             timerStr = string.Format("{0:00}:{1:00}", Mathf.FloorToInt(newTime / 60), Mathf.FloorToInt(newTime % 60));

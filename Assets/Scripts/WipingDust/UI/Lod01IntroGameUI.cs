@@ -11,11 +11,7 @@ namespace LastOfDust.UI
     {
         [Header("UI")]
         [SerializeField] private Button startGame;
-        [SerializeField] private Button quitGame;
-
-
-        [Header("Next")]
-        [SerializeField] private Lod02SelectGameTypeUI selectGameTypeScreen;
+        [SerializeField] private Button quitGame;        
 
         protected override void OnEnable()
         {
@@ -48,8 +44,7 @@ namespace LastOfDust.UI
         [Button]
         private void OnStartGame()
         {
-            //LastOfDustChore.Instance.StartChore(true);
-            BaseUIManager.Instance.GoTo(selectGameTypeScreen);
+            LastOfDustChore.Instance.SelectGameTypeScreen();
         }
 
         [Button]

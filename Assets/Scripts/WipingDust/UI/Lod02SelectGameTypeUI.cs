@@ -47,15 +47,12 @@ namespace LastOfDust.UI
         [Button]
         private void OnStartDeepCleanGameMode()
         {
-            BaseUIManager.Instance.GoTo(hudInGameUI);
-
-            LastOfDustChore.Instance.StartChore(true);
+            LastOfDustChore.Instance.StartDeepCleanGameMode();
         }
 
         [Button]
         private void OnSurfaceSelection()
         {
-            BaseUIManager.Instance.GoTo(surfaceSelectionUiScreen);
             LastOfDustChore.Instance.InitializeSurfaceSelection();
         }
     }

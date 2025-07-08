@@ -43,16 +43,6 @@ namespace LastOfDust.UI
             }
         }
 
-        private void DisplayGameResultSection()
-        {
-            if (LastOfDustChore.Instance == null) return;
-            bool timesUp = LastOfDustChore.Instance.ChoreCurrentTime == 0f;
-
-            // TODO: here UI team, you define what you want to do - I literally created 2 fake gameobjects for tests
-            gameLostSection.SetActive(timesUp);
-            gameWonSection.SetActive(!timesUp);
-        }
-
         protected override void OnDisable()
         {
             base.OnDisable();
@@ -74,28 +64,29 @@ namespace LastOfDust.UI
         [Button]
         private void OnRetry()
         {
-            FullReset();
-        }
-
-        private static void FullReset()
-        {
-            LastOfDustChore.Instance.Reset();
-            BaseUIManager.Instance.ResetAndGoTo(0);
+            LastOfDustChore.Instance.RestartGame();
         }
 
         [Button]
         private void GoToReanchorSurface()
         {
-            FullReset();
-
-            LastOfDustChore.Instance.PlayMode = PlayModeEnum.SelectArea;
-            BaseUIManager.Instance.GoTo(surfaceSelectionScreenUI);
+            LastOfDustChore.Instance.RestartOnSelectSurface();
         }
 
         [Button]
         private void OnQuitGame()
         {
             LastOfDustChore.Instance.QuitGame();
+        }
+        
+        private void DisplayGameResultSection()
+        {
+            if (LastOfDustChore.Instance == null) return;
+            bool timesUp = LastOfDustChore.Instance.ChoreCurrentTime == 0f;
+
+            // TODO: here UI team, you define what you want to do - I literally created 2 fake gameobjects for tests
+            gameLostSection.SetActive(timesUp);
+            gameWonSection.SetActive(!timesUp);
         }
 
     }

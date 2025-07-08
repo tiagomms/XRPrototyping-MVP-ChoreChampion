@@ -76,6 +76,8 @@ namespace Chores
         /// </summary>
         public virtual void CompleteChore(bool inTime = true)
         {
+            isChoreActive = false;
+
             var choreStats = new ChoreStats(choreId, score, timeElapsed, inTime);
             onChoreCompleted.Invoke(choreStats);
         }
@@ -115,12 +117,12 @@ namespace Chores
         public void QuitGame()
         {
             // ???: unsure if I want this part
-            
+
             if (isChoreActive)
             {
                 Reset();
             }
-            
+
 
             // go back to main menu
             SceneManager.LoadScene(0);
@@ -129,7 +131,8 @@ namespace Chores
         public virtual void Reset()
         {
             isChoreActive = false;
-            timeElapsed = 0f; // reset timer and chores 
+            timeElapsed = 0f; // reset timer and chores
+            score = 0f;
         }
 
         public virtual void AddScore(float points)
