@@ -38,6 +38,7 @@ namespace PassthroughCameraSamples.MultiObjectDetection
         // start menu
         private int m_objectsDetected = 0;
         private int m_objectsIdentified = 0;
+        public bool omitInitialMenu;
 
         // pause menu
         public bool IsPaused { get; private set; } = true;
@@ -108,7 +109,11 @@ namespace PassthroughCameraSamples.MultiObjectDetection
             {
                 m_initialMenu = true;
                 IsPaused = true;
-                m_initialPanel.SetActive(true);
+                if (!omitInitialMenu)
+                {
+                    m_initialPanel.SetActive(true);
+                }
+
                 m_noPermissionPanel.SetActive(false);
             }
             else
@@ -176,7 +181,7 @@ namespace PassthroughCameraSamples.MultiObjectDetection
             _activeMenu = true;
             IsInputActive = true;
         }
-        
+
         public void DeactivateMenu()
         {
             _activeMenu = false;
