@@ -1,5 +1,6 @@
 // Copyright (c) Meta Platforms, Inc. and affiliates.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -170,7 +171,7 @@ namespace PassthroughCameraSamples.MultiObjectDetection
             var count = 0;
             foreach (var box in m_uiInference.CurrentBoundingBoxList)
             {
-                if (!trackedClasses.Contains(box.ClassName)) continue;
+                if (!trackedClasses.Any(c => c.Trim().Equals(box.ClassName.Trim(), StringComparison.OrdinalIgnoreCase))) continue;             
                 if (PlaceMarkerUsingEnvironmentRaycast(box.WorldPos, box.ClassName))
                 {
                     count++;
