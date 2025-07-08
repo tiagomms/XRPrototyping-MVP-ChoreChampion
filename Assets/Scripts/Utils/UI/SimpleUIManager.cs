@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class UIManager : MonoBehaviour
+public class SimpleUIManager : MonoBehaviour
 {
     [Header("Assign all UI panels here (Main Menu should be first)")]
     [SerializeField] private List<GameObject> uiPanels;

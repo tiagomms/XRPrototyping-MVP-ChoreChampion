@@ -13,8 +13,17 @@ namespace UI
         [Header("Assign all UI panels here (Main Menu should be first)")]
         [SerializeField] private List<BaseUI> uiPanels = new List<BaseUI>();
         public List<BaseUI> UiPanels => uiPanels;
+
+
+        // TODO: pause is not here it is somewhere else
+        [SerializeField] private BaseUI pausePanel;
+        public BaseUI PausePanel => pausePanel;
+
+
         private Stack<BaseUI> navigationStack = new Stack<BaseUI>();
         private BaseUI currentUI;
+
+        private bool isPausing;
 
         protected virtual void Awake()
         {
@@ -30,17 +39,36 @@ namespace UI
         private void Start()
         {
             // Hide all panels initially
+            HideAll();
+            GoTo(0);
+        }
+
+        public void HideAll()
+        {
             foreach (var panel in uiPanels)
             {
                 panel.Hide();
             }
+        }
 
-            // Show first panel (assumed to be main menu)
-            if (uiPanels.Count > 0)
+        // TODO: pause is not here, it is somewhere else
+        public void ShowPause()
+        {
+            pausePanel.Show();
+        }
+
+        public void HidePause()
+        {
+            pausePanel.Hide();
+        }
+
+        public void GoTo(int panelIndex)
+        {
+            if (panelIndex < 0 || panelIndex >= uiPanels.Count)
             {
-                currentUI = uiPanels[0];
-                currentUI.Show();
+                Debug.LogWarning($"[{nameof(BaseUIManager)}] - {nameof(GoTo)}: index {panelIndex} is not between 0 and the total of {uiPanels.Count} panels we have in uiPanels");
             }
+            GoTo(uiPanels[panelIndex]);
         }
 
         public void GoTo(BaseUI nextUI)
@@ -53,6 +81,27 @@ namespace UI
                 currentUI.Hide();
                 navigationStack.Push(currentUI);
             }
+
+            nextUI.Show();
+            currentUI = nextUI;
+        }
+
+        public void ResetAndGoTo(int panelIndex)
+        {
+            if (panelIndex < 0 || panelIndex >= uiPanels.Count)
+            {
+                Debug.LogWarning($"[{nameof(BaseUIManager)}] - {nameof(ResetAndGoTo)}: index {panelIndex} is not between 0 and the total of {uiPanels.Count} panels we have in uiPanels");
+            }
+            GoTo(uiPanels[panelIndex]);
+        }
+
+        public void ResetAndGoTo(BaseUI nextUI)
+        {
+            currentUI = null;
+            if (nextUI == null || nextUI == currentUI)
+                return;
+
+            navigationStack.Clear();
 
             nextUI.Show();
             currentUI = nextUI;
