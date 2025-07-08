@@ -16,8 +16,18 @@ namespace PassthroughCameraSamples.MultiObjectDetection
         private Vector3 m_angles;
         private OVRCameraRig m_camera;
 
+        public float timeToLive = 1.0f;
+        private float _mTimeToLiveCounter;
+
         private void Update()
         {
+            _mTimeToLiveCounter += Time.deltaTime;
+            if (_mTimeToLiveCounter > timeToLive)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
             m_angles.x = AddAngle(m_angles.x, m_anglesSpeed.x * Time.deltaTime);
             m_angles.y = AddAngle(m_angles.y, m_anglesSpeed.y * Time.deltaTime);
             m_angles.z = AddAngle(m_angles.z, m_anglesSpeed.z * Time.deltaTime);
@@ -58,6 +68,11 @@ namespace PassthroughCameraSamples.MultiObjectDetection
         public string GetYoloClassName()
         {
             return m_textModel.text;
+        }
+
+        public void RestTimeToLive()
+        {
+            _mTimeToLiveCounter = 0;
         }
     }
 }

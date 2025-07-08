@@ -48,6 +48,7 @@ namespace PassthroughCameraSamples.MultiObjectDetection
         protected Tensor<float> m_pullOutput;
         protected Tensor<int> m_pullLabelIDs;
         protected bool m_isWaiting = false;
+        public bool drawPrefabs = true;
 
         protected bool m_doesModelIdentifyOnlyOneThing;
 
@@ -256,8 +257,11 @@ namespace PassthroughCameraSamples.MultiObjectDetection
                         m_uiInference.DrawBoundingBoxes();
                     }
                     if (expectedOutput == ExpectedOutput.PrefabsOnly || expectedOutput == ExpectedOutput.BoxesAndPrefab)
-                    {                    
-                        m_uiInference.DrawPrefabs();
+                    {     
+                        if(drawPrefabs)
+                        {
+                            m_uiInference.DrawPrefabs();
+                        }
                     }
                     m_download_state = 5;
                     break;

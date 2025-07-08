@@ -46,16 +46,16 @@ namespace ChoreChampion.XR.MRUtilityKit
         /// <param name="iteration">Current iteration number for incremental offset calculation. (ignored in this one)</param>
         /// <returns>True if position was calculated successfully, false otherwise.</returns>
         protected override bool CalculateSpawnPositionAndNormal(MRUK.SurfaceType surfaceType, MRUKAnchor anchor, out Vector3 spawnPosition, out Vector3 spawnNormal, int iteration = 0)
-        {
+        {         
+            spawnPosition = Vector3.zero;
+            spawnNormal = Vector3.zero;
+
             if (GenerateRandomPositionOnSpecificSurfaceAnchor(surfaceType, _minRadius, anchor, out var pos, out var normal))
             {
                 spawnPosition = pos + normal * _baseOffset;
                 spawnNormal = normal;
                 return true;
             }
-            
-            spawnPosition = Vector3.zero;
-            spawnNormal = Vector3.zero;
             return false;
         }
     }

@@ -24,6 +24,11 @@ namespace ChoreChampion.XR.MRUtilityKit
             public float TotalUsableSurfaceArea;
         }
 
+        /// <summary>
+        /// Reference to the center eye transform (user's head position).
+        /// </summary>
+        [SerializeField] protected Transform centerEyeTransform;
+
         [Tooltip("Class that selects Game Anchor.")]
         [SerializeField] protected GameAnchorSelection gameAnchorSelection;
 
@@ -118,7 +123,8 @@ namespace ChoreChampion.XR.MRUtilityKit
         protected int _currentSpawnedObjects;
         public int CurrentSpawnedObjects => _currentSpawnedObjects;
 
-        protected void OnValidate()
+
+        protected virtual void OnValidate()
         {
             if (gameAnchorSelection == null)
             {
@@ -126,6 +132,24 @@ namespace ChoreChampion.XR.MRUtilityKit
                 if (gameAnchorSelection == null)
                 {
                     Debug.LogError($"[{GetType()}] - ERROR: requires {nameof(GameAnchorSelection)} object in game");
+                }
+            }
+
+            // Find center eye transform - prioritize "CenterEyeAnchor" GameObject, fallback to first Camera
+            if (centerEyeTransform == null)
+            {
+                GameObject centerEyeAnchor = GameObject.Find("CenterEyeAnchor");
+                if (centerEyeAnchor != null)
+                {
+                    centerEyeTransform = centerEyeAnchor.transform;
+                }
+                else
+                {
+                    GameObject firstCamera = GameObject.FindWithTag("MainCamera");
+                    if (firstCamera != null)
+                    {
+                        centerEyeTransform = firstCamera.transform;
+                    }
                 }
             }
         }
@@ -204,7 +228,7 @@ namespace ChoreChampion.XR.MRUtilityKit
                 float totalUsableSurfaceArea = 0f;
 
                 // FIXME: minDistance to edge?
-                var anchorSurfacesList = MRUKExtension.GetAnchorSurfaces(surfaceTypes, _minRadius, anchor, ref totalUsableSurfaceArea);
+                List<MRUKExtension.Surface> anchorSurfacesList = GetAnchorSurfaces(surfaceTypes, anchor, ref totalUsableSurfaceArea);
                 if (anchorSurfacesList.Count == 0)
                 {
                     Debug.LogWarning($"[{GetType().Name} - {nameof(BuildAnchorsSurfaceDataDictionary)}]: Anchor {anchor.name} does not have surfaces!");
@@ -220,6 +244,11 @@ namespace ChoreChampion.XR.MRUtilityKit
                     }
                 );
             }
+        }
+
+        protected virtual List<MRUKExtension.Surface> GetAnchorSurfaces(MRUK.SurfaceType surfaceTypes, MRUKAnchor anchor, ref float totalUsableSurfaceArea)
+        {
+            return MRUKExtension.GetAnchorSurfaces(surfaceTypes, _minRadius, anchor, ref totalUsableSurfaceArea);
         }
 
         /// <summary>
@@ -345,20 +374,6 @@ namespace ChoreChampion.XR.MRUtilityKit
             var anchorSurfacesList = surfaceData.SurfaceList;
             var totalUsableSurfaceArea = surfaceData.TotalUsableSurfaceArea;
 
-            /*
-            if (!InitializeAnchorSurfaces(surfaceTypes, minDistanceToEdge, anchor, out var anchorSurfacesList))
-            {
-                return false;
-            }
-            
-
-            float totalUsableSurfaceArea = 0f;
-            for (int i = 0; i < anchorSurfacesList.Count; i++)
-            {
-                totalUsableSurfaceArea += anchorSurfacesList[i].UsableArea;
-            }
-            */
-
             for (int i = 0; i < MaxIterations; ++i)
             {
                 // Pick a random surface weighted by surface area (anchorSurfacesList with a larger
@@ -417,15 +432,6 @@ namespace ChoreChampion.XR.MRUtilityKit
             }
             var surfaceData = anchorsSurfaceData[anchor];
             var anchorSurfacesList = surfaceData.SurfaceList;
-            var totalUsableSurfaceArea = surfaceData.TotalUsableSurfaceArea;
-
-            /*
-            // FIXME: ignoring minDistanceToEdge right now due to rotation issues ahead
-            if (!InitializeAnchorSurfaces(surfaceTypes, 0f, anchor, out var anchorSurfacesList))
-            {
-                return false;
-            }
-            */
 
             // TODO: Right now only works on a single surface (the first one). Extend code in the future.
             // Use the first surface for fixed positioning (or could be made configurable)
@@ -435,8 +441,8 @@ namespace ChoreChampion.XR.MRUtilityKit
             // Lerp local position from [-0.5, 0.5] range to bounds coordinates respecting minDistanceToEdge
             // localPosition.x = -0.5 maps to bounds.xMin + minDistanceToEdge
             // localPosition.x = 0.5 maps to bounds.xMax - minDistanceToEdge
-            float mappedX = Mathf.Lerp(bounds.xMin + 0f, bounds.xMax - 0f, localPosition.x + 0.5f);
-            float mappedY = Mathf.Lerp(bounds.yMin + 0f, bounds.yMax - 0f, localPosition.y + 0.5f);
+            float mappedX = Mathf.Lerp(bounds.xMin + minDistanceToEdge, bounds.xMax - minDistanceToEdge, localPosition.x + 0.5f);
+            float mappedY = Mathf.Lerp(bounds.yMin + minDistanceToEdge, bounds.yMax - minDistanceToEdge, localPosition.y + 0.5f);
 
             Vector2 mappedPosition = new Vector2(mappedX, mappedY);
 
@@ -445,8 +451,28 @@ namespace ChoreChampion.XR.MRUtilityKit
                 return false;
             }
 
-            position = surface.Transform.MultiplyPoint3x4(new (mappedPosition.x, mappedPosition.y, 0f));
+            position = surface.Transform.MultiplyPoint3x4(new(mappedPosition.x, mappedPosition.y, 0f));
             normal = surface.Transform.MultiplyVector(Vector3.forward);
+            return true;
+        }
+
+        // similar to fixed, but in this case it is based on the closest position to vector provided
+        public virtual bool GenerateClosestPositionOnSpecificSurfaceAnchor(MRUK.SurfaceType surfaceTypes, Vector2 localPosition, float minDistanceToEdge, MRUKAnchor anchor, out Vector3 position, out Vector3 normal, MRUKExtension.SnapTarget snapTarget, MRUKExtension.Clamp2DValues clampLocation)
+        {
+            // define these as the negative early exit conditions
+            position = Vector3.zero;
+            normal = Vector3.zero;
+
+            if (!anchorsSurfaceData.ContainsKey(anchor))
+            {
+                return false;
+            }
+            var surfaceData = anchorsSurfaceData[anchor];
+            var anchorSurfacesList = surfaceData.SurfaceList;
+
+            // TODO: Right now only works on a single surface (the first one). Extend code in the future
+            var surface = anchorSurfacesList[0];
+            surface.GetClosestPositionToSurface(centerEyeTransform.position, _minRadius, out var mappedPosition, out position, out normal, snapTarget, localPosition, clampLocation);
             return true;
         }
 

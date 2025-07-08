@@ -10,70 +10,73 @@ using PassthroughCameraSamples;
 [System.Serializable]
 public class ClothingAnalysisResult
 {
-    public Dictionary<string, int> summaryCounts = new Dictionary<string, int>();
-
-    public int TotalCount => summaryCounts.Values.Sum();
-
+    // For laundry toss game
+    public string RoomTidyStatus { get; set; } = "Unknown";
+    
+    // For folding game
+    public Dictionary<string, int> ClothingCounts = new Dictionary<string, int>();
+    
+    public int TotalClothingCount => ClothingCounts.Values.Sum();
+    
     public int GetCount(string clothingType) => 
-        summaryCounts.TryGetValue(clothingType, out int count) ? count : 0;
-
-    public List<string> AllDetectedClothingTypesAsList => 
-        summaryCounts.SelectMany(entry => Enumerable.Repeat(entry.Key, entry.Value)).ToList();
+        ClothingCounts.TryGetValue(clothingType, out int count) ? count : 0;
+    
+    public List<string> AllDetectedClothingTypes => ClothingCounts.Keys.ToList();
 }
 
 public class ClothingAnalyzer : MonoBehaviour
 {
     [Header("API Configuration")]
-    public string apiKey = "YOUR_API_KEY_HERE"; // Replace with your actual API key
+    public string apiKey = "YOUR_API_KEY_HERE";
     private string apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 
     [Header("Analysis Mode")]
-    public AnalyzeMode currentAnalyzeMode = AnalyzeMode.LiveCamera;
+    public AnalyzeMode currentMode = AnalyzeMode.LiveCamera;
+    public AnalysisType analysisType = AnalysisType.LaundryToss;
     public Texture2D testImage;
 
     [Header("Camera Setup")]
     public WebCamTextureManager webCamTextureManager;
 
-    public ClothingAnalysisResult CurrentAnalysis { get; private set; }
+    public ClothingAnalysisResult CurrentResult { get; private set; }
+    public event Action<ClothingAnalysisResult> OnAnalysisComplete;
 
     public enum AnalyzeMode { LiveCamera, UseTestImage }
+    public enum AnalysisType { 
+        LaundryToss, // Just needs room status
+        FoldingGame  // Needs detailed clothing counts
+    }
 
     void Start() => StartCoroutine(InitializeAndAnalyze());
 
     IEnumerator InitializeAndAnalyze()
     {
-        Debug.Log("[ClothingAnalyzer] Initializing...");
+        Debug.Log("[UnifiedAnalyzer] Initializing...");
 
-        if (currentAnalyzeMode == AnalyzeMode.LiveCamera)
+        if (currentMode == AnalyzeMode.LiveCamera)
         {
-            while (webCamTextureManager == null || webCamTextureManager.WebCamTexture == null || 
-                  !webCamTextureManager.WebCamTexture.isPlaying)
+            while (webCamTextureManager == null || 
+                   webCamTextureManager.WebCamTexture == null || 
+                   !webCamTextureManager.WebCamTexture.isPlaying)
             {
                 yield return null;
             }
         }
         else if (testImage == null)
         {
-            Debug.LogError("[ClothingAnalyzer] No test image assigned for UseTestImage mode");
+            Debug.LogError("[UnifiedAnalyzer] No test image assigned for UseTestImage mode");
             yield break;
         }
         
-        AnalyzeClothing();
+        Analyze();
     }
 
-    public void AnalyzeClothing()
+    public void Analyze()
     {
         StopAllCoroutines();
-        
-        switch (currentAnalyzeMode)
-        {
-            case AnalyzeMode.UseTestImage:
-                StartCoroutine(AnalyzeTexture(testImage));
-                break;
-            case AnalyzeMode.LiveCamera:
-                StartCoroutine(CaptureAndAnalyze());
-                break;
-        }
+        StartCoroutine(currentMode == AnalyzeMode.LiveCamera ? 
+            CaptureAndAnalyze() : 
+            AnalyzeTexture(testImage));
     }
 
     IEnumerator AnalyzeTexture(Texture2D texture)
@@ -99,15 +102,20 @@ public class ClothingAnalyzer : MonoBehaviour
         byte[] imageBytes = screenshot.EncodeToJPG(quality: 75);
         string base64Image = Convert.ToBase64String(imageBytes);
 
-        string promptText = @"Analyze this image and list all visible clothing items with their counts.
-Respond ONLY with lines in format: ""[ClothingType]: [Count]""
-Example:
-T-Shirt: 2
-Jeans: 1
-Sneakers: 1
-Do NOT include any other text or explanations.";
+        string promptText = analysisType switch
+        {
+            AnalysisType.LaundryToss => 
+                @"Analyze this room for laundry. Respond with:
+                RoomTidyStatus: [Tidy/Untidy]
+                Then list any clothing items as: [ClothingType]: [Count]",
+                
+            AnalysisType.FoldingGame =>
+                @"List all visible clothing items with counts. 
+                Respond ONLY with lines in format: ""[ClothingType]: [Count]""",
+                
+            _ => throw new ArgumentOutOfRangeException()
+        };
 
-        // Manually construct the JSON string to match the working format
         string json = 
         @"{
             ""contents"": [{
@@ -142,61 +150,70 @@ Do NOT include any other text or explanations.";
             if (www.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogError($"API Error: {www.error}\nResponse: {www.downloadHandler.text}");
+                OnAnalysisComplete?.Invoke(null);
                 yield break;
             }
 
             Debug.Log("API Response: " + www.downloadHandler.text);
             ProcessAIResponse(www.downloadHandler.text);
-            LogResults();
+            OnAnalysisComplete?.Invoke(CurrentResult);
         }
     }
 
-  void ProcessAIResponse(string jsonResponse)
-{
-    CurrentAnalysis = new ClothingAnalysisResult();
-    
-    try
+    void ProcessAIResponse(string jsonResponse)
     {
-        // Parse the JSON response
-        var response = JsonUtility.FromJson<GeminiResponse>(jsonResponse);
+        CurrentResult = new ClothingAnalysisResult();
         
-        if (response?.candidates == null || response.candidates.Length == 0)
+        try
         {
-            Debug.LogError("No candidates in response");
-            return;
-        }
-
-        // Get the text content from the first candidate
-        string content = response.candidates[0].content.parts[0].text;
-        
-        if (string.IsNullOrEmpty(content))
-        {
-            Debug.LogError("Empty content in response");
-            return;
-        }
-
-        Debug.Log("Extracted content:\n" + content);
-
-        // Parse each line of the response
-        foreach (string line in content.Split('\n'))
-        {
-            string trimmed = line.Trim();
-            if (string.IsNullOrEmpty(trimmed)) continue;
-
-            string[] parts = trimmed.Split(':');
-            if (parts.Length == 2 && int.TryParse(parts[1].Trim(), out int count))
+            var response = JsonUtility.FromJson<GeminiResponse>(jsonResponse);
+            
+            if (response?.candidates == null || response.candidates.Length == 0)
             {
-                string clothingType = parts[0].Trim();
-                CurrentAnalysis.summaryCounts[clothingType] = count;
-                Debug.Log($"Found clothing: {clothingType} - {count}");
+                Debug.LogError("No candidates in response");
+                return;
+            }
+
+            string content = response.candidates[0].content.parts[0].text;
+            
+            if (string.IsNullOrEmpty(content))
+            {
+                Debug.LogError("Empty content in response");
+                return;
+            }
+
+            Debug.Log("Extracted content:\n" + content);
+
+            foreach (string line in content.Split('\n'))
+            {
+                string trimmed = line.Trim();
+                if (string.IsNullOrEmpty(trimmed)) continue;
+
+                // Handle room status line (for LaundryToss)
+                if (analysisType == AnalysisType.LaundryToss && 
+                    trimmed.StartsWith("RoomTidyStatus:", StringComparison.OrdinalIgnoreCase))
+                {
+                    string status = trimmed.Substring("RoomTidyStatus:".Length).Trim();
+                    CurrentResult.RoomTidyStatus = status;
+                    continue;
+                }
+
+                // Handle clothing counts (for both modes)
+                string[] parts = trimmed.Split(':');
+                if (parts.Length == 2 && int.TryParse(parts[1].Trim(), out int count))
+                {
+                    string clothingType = parts[0].Trim();
+                    CurrentResult.ClothingCounts[clothingType] = count;
+                }
             }
         }
+        catch (Exception e)
+        {
+            Debug.LogError($"Response parsing failed: {e.Message}");
+            CurrentResult = null;
+        }
     }
-    catch (Exception e)
-    {
-        Debug.LogError($"Response parsing failed: {e.Message}");
-    }
-}
+
 
 // Add these classes for JSON parsing
 [System.Serializable]
@@ -247,12 +264,25 @@ private class TokenDetail
 }
     void LogResults()
     {
-        Debug.Log("=== Clothing Analysis Results ===");
-        foreach (var item in CurrentAnalysis.summaryCounts)
+        if (CurrentResult == null)
+        {
+            Debug.Log("No analysis results available");
+            return;
+        }
+
+        Debug.Log("=== Analysis Results ===");
+
+        if (analysisType == AnalysisType.LaundryToss)
+        {
+            Debug.Log($"Room Status: {CurrentResult.RoomTidyStatus}");
+        }
+
+        foreach (var item in CurrentResult.ClothingCounts)
         {
             Debug.Log($"{item.Key}: {item.Value}");
         }
-        Debug.Log($"TOTAL: {CurrentAnalysis.TotalCount} items");
-        Debug.Log("================================");
+
+        Debug.Log($"TOTAL: {CurrentResult.TotalClothingCount} items");
+        Debug.Log("========================");
     }
 }
