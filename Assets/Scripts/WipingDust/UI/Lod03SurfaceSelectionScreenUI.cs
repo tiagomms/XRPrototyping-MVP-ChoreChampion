@@ -84,12 +84,5 @@ namespace LastOfDust.UI
                 item.Key.WhenSelect.RemoveListener(() => GameAnchorSelected(item.Value));
             }
         }
-
-        public override void GoBack()
-        {
-            LastOfDustChore.Instance.Reset();
-            base.GoBack();
-        }
-
     }
 }
