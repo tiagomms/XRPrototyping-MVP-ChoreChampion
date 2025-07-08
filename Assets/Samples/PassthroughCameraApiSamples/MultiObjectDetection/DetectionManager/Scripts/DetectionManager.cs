@@ -2,6 +2,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Meta.XR.Samples;
 using UnityEngine;
 using UnityEngine.Events;
@@ -44,7 +45,7 @@ namespace PassthroughCameraSamples.MultiObjectDetection
         private bool m_isSentisReady = false;
         private float m_delayPauseBackTime = 0;
         public bool autoTrack;
-
+        public string[] trackedClasses;
         #region Unity Functions
 
         private void Awake()
@@ -169,6 +170,7 @@ namespace PassthroughCameraSamples.MultiObjectDetection
             var count = 0;
             foreach (var box in m_uiInference.CurrentBoundingBoxList)
             {
+                if (!trackedClasses.Contains(box.ClassName)) continue;
                 if (PlaceMarkerUsingEnvironmentRaycast(box.WorldPos, box.ClassName))
                 {
                     count++;
@@ -197,7 +199,7 @@ namespace PassthroughCameraSamples.MultiObjectDetection
 
             // Check if you spanwed the same object before
             var existMarker = false;
-            foreach (var e in m_spwanedEntities)
+            foreach (var e in m_spwanedEntities.ToList())
             {
                 if (e == null)
                 {

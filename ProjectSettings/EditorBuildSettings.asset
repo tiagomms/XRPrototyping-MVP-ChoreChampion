@@ -14,9 +14,15 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/Tiago/Tests/ClothesDetectionWithModel.unity
     guid: 42b7a0f3546ca114a8d5449f39ab3f0f
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Reem/ClothesDetection-Reem-WithTiagoPrefabSpawner.unity
     guid: 00951ac502cb8eb469448734b0b9df45
+  - enabled: 0
+    path: Assets/Scenes/Daniel/LaundryToss2.unity
+    guid: 07e979fcb05692b48aa888c7b0643336
+  - enabled: 1
+    path: Assets/Scenes/Daniel/LaundryTossWorking.unity
+    guid: ec52fd5d664be714da93d14e74538aac
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 3d9205113d6907e46b1cf38f90daf995, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

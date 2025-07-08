@@ -9,7 +9,9 @@ namespace Chores
     /// </summary>
     public abstract class Chore : MonoBehaviour
     {
-        [Header("Chore Configuration")] [SerializeField] protected string choreId;
+        [Header("Chore Configuration")] [SerializeField]
+        protected string choreId;
+
         [SerializeField] protected string choreName;
         [TextArea] [SerializeField] protected string choreDescription;
 
@@ -26,7 +28,6 @@ namespace Chores
         /// </summary>
         public virtual void StartChore(bool hasPlayedChore = false)
         {
-            isChoreActive = true;
             timeElapsed = 0f;
             if (hasPlayedChore) // If this is the first time playing, show a tutorial or introduction
             {
@@ -78,7 +79,7 @@ namespace Chores
                 timeElapsed += Time.deltaTime;
             }
         }
-        
+
         public string GetChoreId()
         {
             return choreId;
