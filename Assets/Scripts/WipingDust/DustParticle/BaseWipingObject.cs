@@ -2,13 +2,14 @@ using UnityEngine;
 using UnityEngine.Events;
 using System.Collections.Generic;
 using ChoreChampion.XR.MRUtilityKit;
+using System.Linq;
 
 /// <summary>
 /// Abstract base class for dust particle objects. Contains shared fields, cooldown, life, and event logic.
 /// Does NOT implement trigger or collision logic; derived classes must handle those.
 /// </summary>
 [RequireComponent(typeof(Rigidbody))]
-public abstract class BaseDustParticle : MRUKSpawnedObject
+public abstract class BaseWipingObject : MRUKSpawnedObject
 {
     /// <summary>
     /// All child colliders of this dust particle.
@@ -20,6 +21,7 @@ public abstract class BaseDustParticle : MRUKSpawnedObject
     /// The Rigidbody component attached to the root GameObject.
     /// </summary>
     protected Rigidbody rootRigidbody;
+    public Rigidbody RootRigidbody => rootRigidbody;
 
     /// <summary>
     /// LayerMask to restrict which layers can interact with this particle.
@@ -55,6 +57,8 @@ public abstract class BaseDustParticle : MRUKSpawnedObject
     /// </summary>
     [SerializeField]
     protected float hitCooldown = 0.2f;
+
+    //[SerializeField] protected bool onDeathIsKinematic = true;
 
     /// <summary>
     /// Time when the last hit was registered.
@@ -111,6 +115,7 @@ public abstract class BaseDustParticle : MRUKSpawnedObject
         {
             onDustParticleKilled.Invoke();
             isAlive = false;
+            //rootRigidbody.isKinematic = onDeathIsKinematic;
         }
     }
 
@@ -129,5 +134,49 @@ public abstract class BaseDustParticle : MRUKSpawnedObject
         base.OnDestroy();
         onDustParticleHit.RemoveAllListeners();
         onDustParticleKilled.RemoveAllListeners();
+    }
+
+    public void InitializeColliders<T>(T colliders) where T : IEnumerable<Collider>
+    {
+        ClearColliders();
+        AddColliders(colliders);
+    }
+
+    public void ClearColliders()
+    {
+        childColliders.Clear();
+    }
+
+    /// <summary>
+    /// Adds multiple colliders to the childColliders list. Accepts arrays or lists.
+    /// </summary>
+    /// <typeparam name="T">A collection type implementing IEnumerable<Collider>.</typeparam>
+    /// <param name="colliders">The colliders to add.</param>
+    public void AddColliders<T>(T colliders) where T : IEnumerable<Collider>
+    {
+        if (colliders == null)
+        {
+            //Debug.LogWarning("AddColliders: Provided collection is null.", this);
+            return;
+        }
+        childColliders.AddRange(colliders);
+    }
+
+    /// <summary>
+    /// Removes multiple colliders from the childColliders list. Accepts arrays or lists.
+    /// </summary>
+    /// <typeparam name="T">A collection type implementing IEnumerable<Collider>.</typeparam>
+    /// <param name="colliders">The colliders to remove.</param>
+    public void RemoveColliders<T>(T colliders) where T : IEnumerable<Collider>
+    {
+        if (colliders == null)
+        {
+            //Debug.LogWarning("RemoveColliders: Provided collection is null.", this);
+            return;
+        }
+        foreach (Collider col in colliders)
+        {
+            childColliders.Remove(col);
+        }
     }
 }

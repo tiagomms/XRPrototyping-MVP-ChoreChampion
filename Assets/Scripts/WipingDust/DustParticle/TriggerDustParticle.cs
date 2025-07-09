@@ -3,7 +3,7 @@ using UnityEngine;
 /// <summary>
 /// Dust particle that responds to trigger events.
 /// </summary>
-public class TriggerDustParticle : BaseDustParticle
+public class TriggerDustParticle : BaseWipingObject
 {
     /// <summary>
     /// Unity OnTriggerEnter: Handles trigger-based hit logic with cooldown.

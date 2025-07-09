@@ -6,7 +6,7 @@ using DG.Tweening;
 /// </summary>
 public class TestDustCubeMesh : MonoBehaviour
 {
-    private BaseDustParticle _dustParticle;
+    private BaseWipingObject _dustParticle;
     /// <summary>
     /// Minimum Y scale when flattened.
     /// </summary>
@@ -30,7 +30,7 @@ public class TestDustCubeMesh : MonoBehaviour
     /// </summary>
     private void Awake()
     {
-        _dustParticle = GetComponentInParent<BaseDustParticle>();
+        _dustParticle = GetComponentInParent<BaseWipingObject>();
 
         defaultScale = transform.localScale;
     }

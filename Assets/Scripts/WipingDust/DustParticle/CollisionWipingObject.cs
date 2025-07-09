@@ -3,7 +3,7 @@ using UnityEngine;
 /// <summary>
 /// Dust particle that responds to collision events and accumulates force.
 /// </summary>
-public class CollisionDustParticle : BaseDustParticle
+public class CollisionWipingObject : BaseWipingObject
 {
     /// <summary>
     /// Minimum collision force required to register a hit.
