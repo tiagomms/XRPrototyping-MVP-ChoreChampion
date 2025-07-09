@@ -9,6 +9,7 @@ namespace Chores
         [SerializeField] private AudioSource audioSource;
         [SerializeField] private GameObject scoreVisual;
         [SerializeField] private Transform scoreVisualPosition;
+        [SerializeField] private float ttl = 2f;
 
         public void OnTriggerEnter(Collider other)
         {
@@ -17,7 +18,7 @@ namespace Chores
             audioSource.Play();
             laundryToss.AddScore();
             var score = Instantiate(scoreVisual, scoreVisualPosition.position, Quaternion.identity);
-            Destroy(score, 0.5f);
+            Destroy(score, ttl);
         }
     }
 }

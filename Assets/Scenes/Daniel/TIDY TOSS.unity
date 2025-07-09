@@ -8381,6 +8381,7 @@ Transform:
   - {fileID: 1145506639}
   - {fileID: 1870245833}
   - {fileID: 358644470}
+  - {fileID: 899385082}
   m_Father: {fileID: 1790596391}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &710825971
@@ -9357,7 +9358,8 @@ MonoBehaviour:
   particleSystem: {fileID: 1870245834}
   audioSource: {fileID: 762926404}
   scoreVisual: {fileID: 2436538376568224976, guid: 7548984acdb1d0849abd06894b0a923c, type: 3}
-  scoreVisualPosition: {fileID: 358644470}
+  scoreVisualPosition: {fileID: 899385082}
+  ttl: 2
 --- !u!65 &762926399
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -10742,6 +10744,37 @@ Transform:
   - {fileID: 1387241857}
   - {fileID: 1841919763}
   m_Father: {fileID: 702466788}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &899385081
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 899385082}
+  m_Layer: 0
+  m_Name: ScorePoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &899385082
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 899385081}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 8, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 710825970}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &899893648
 GameObject:
