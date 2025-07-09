@@ -110,6 +110,7 @@ MonoBehaviour:
   onDestroyed:
     m_PersistentCalls:
       m_Calls: []
+  maxRotationOffset: 45
 --- !u!114 &806712626499327495
 MonoBehaviour:
   m_ObjectHideFlags: 0
