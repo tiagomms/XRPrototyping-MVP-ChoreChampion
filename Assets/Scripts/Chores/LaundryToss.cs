@@ -7,9 +7,7 @@ namespace Chores
 {
     public class LaundryToss : Chore
     {
-        //[SerializeField] private float choreTimer = 10f;
         [SerializeField] private TextMeshPro scoreText;
-        [SerializeField] private TextMeshProUGUI timerText;
         public UnityEvent onMiniGameStarted = new();
         public bool autoStart = false;
 
@@ -38,8 +36,7 @@ namespace Chores
         public override void CompleteChore(bool inTime = true)
         {
             base.CompleteChore(inTime);
-            timerText.gameObject.SetActive(false);
- 			Debug.Log("Example Chore completed!");
+            Debug.Log("Example Chore completed!");
         }
 
         public override void EndChore()
@@ -52,7 +49,6 @@ namespace Chores
         {
             base.Update();
             if (!isChoreActive) return;
-            timerText.text = Mathf.Floor(choreTimer - timeElapsed).ToString();
         }
 
         public void AddScore()
