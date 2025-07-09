@@ -1,12 +1,15 @@
 using UnityEngine;
 using DG.Tweening;
+using UnityEngine.Events;
+using ChoreChampion.XR.MRUtilityKit;
 
 /// <summary>
 /// Example dust particle cube that animates its scale on hit and kill events.
 /// </summary>
 public class TestDustCubeMesh : MonoBehaviour
 {
-    private BaseWipingObject _dustParticle;
+    private BaseWipingObject _wipingObj;
+    private MRUKSpawnedObject _mrukSpawnedObject;
     /// <summary>
     /// Minimum Y scale when flattened.
     /// </summary>
@@ -30,7 +33,7 @@ public class TestDustCubeMesh : MonoBehaviour
     /// </summary>
     private void Awake()
     {
-        _dustParticle = GetComponentInParent<BaseWipingObject>();
+        _wipingObj = GetComponentInParent<BaseWipingObject>();
 
         defaultScale = transform.localScale;
     }
@@ -38,9 +41,10 @@ public class TestDustCubeMesh : MonoBehaviour
     
     private void Start() 
     {
+        _mrukSpawnedObject = GetComponentInChildren<MRUKSpawnedObject>();
         // no need to remove listeners because I am deleting the BaseDustParticle
-        _dustParticle.onDustParticleHit.AddListener(AnimateHitScale);
-        _dustParticle.onDustParticleKilled.AddListener(AnimateKillAndDestroy);
+        _wipingObj.onDustParticleHit.AddListener(AnimateHitScale);
+        _wipingObj.onDustParticleKilled.AddListener(AnimateKillAndDestroy);
     }
 
     /// <summary>
@@ -55,8 +59,8 @@ public class TestDustCubeMesh : MonoBehaviour
     private Vector3 CalculateNewScale()
     {
         // 1 is subtracted to both because because on the last hit the thing is killed
-        int maxLife = _dustParticle.MaxLifePoints - 1; 
-        int currentLife = _dustParticle.LifePoints - 1;
+        int maxLife = _wipingObj.MaxLifePoints - 1; 
+        int currentLife = _wipingObj.LifePoints - 1;
         float t = 1.0f - (float)currentLife / maxLife;
         // Interpolate Y from 1.0 to MinYScale, XZ from 1.0 to MaxXZScale
         float yScale = Mathf.Lerp(1.0f, MinYScale, t);
@@ -72,6 +76,6 @@ public class TestDustCubeMesh : MonoBehaviour
     {
         transform.DOScale(Vector3.zero, scaleAnimDuration)
             .SetEase(Ease.InBack)
-            .OnComplete(() => _dustParticle.Delete());
+            .OnComplete(() => _mrukSpawnedObject.Delete());
     }
 } 

@@ -237,7 +237,7 @@ MonoBehaviour:
   - {fileID: 6977387282135932161}
   interactionLayerMask:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 64
   maxLifePoints: 3
   onDustParticleHit:
     m_PersistentCalls:
