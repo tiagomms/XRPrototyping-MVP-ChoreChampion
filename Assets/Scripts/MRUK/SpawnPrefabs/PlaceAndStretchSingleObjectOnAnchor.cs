@@ -1,6 +1,7 @@
 using UnityEngine;
 using Meta.XR.MRUtilityKit;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace ChoreChampion.XR.MRUtilityKit
 {
@@ -13,10 +14,11 @@ namespace ChoreChampion.XR.MRUtilityKit
         protected override void OnValidate()
         {
             base.OnValidate();
+            spawnBasedOn = SpawnBasedOn.AnchorTransform;
             // Force single object placement
             SpawnAmountPerSurface = 1;
             // Force parenting and stretching
-            parentToAnchor = true;
+            straightPlacement = true;
             allowStretch = true;
 
             // make sure just one entry
@@ -32,34 +34,10 @@ namespace ChoreChampion.XR.MRUtilityKit
             }
         }
 
-        /// <summary>
-        /// Every anchor that may use this - needs the list of surfaces where objects may spawn and the toal usable surface area (for random spawns)
-        /// </summary>
-        protected override void BuildAnchorsSurfaceDataDictionary()
+        protected override List<MRUKExtension.Surface> GetAnchorSurfaces(MRUK.SurfaceType surfaceTypes, MRUKAnchor anchor, ref float totalUsableSurfaceArea)
         {
-            anchorsSurfaceData = new();
-
-            foreach (var keyPair in gameAnchorSelection.AnchorPrefabSpawnerObjects)
-            {
-                MRUKAnchor anchor = keyPair.Key;
-                float totalUsableSurfaceArea = 0f;
-
-                // FIXME: minDistance to edge => issue on stretching - if you stretch there is no minDistance to edge
-                var anchorSurfacesList = MRUKExtension.GetAnchorSurfaces(GetSurfaceTypes(), 0f, anchor, ref totalUsableSurfaceArea);
-                if (anchorSurfacesList.Count == 0)
-                {
-                    Debug.LogWarning($"[{GetType().Name} - {nameof(BuildAnchorsSurfaceDataDictionary)}]: Anchor {anchor.name} does not have surfaces!");
-                    continue;
-                }
-
-                anchorsSurfaceData.Add(key: anchor,
-                    value: new AnchorSurfaceData
-                    {
-                        SurfaceList = anchorSurfacesList,
-                        TotalUsableSurfaceArea = totalUsableSurfaceArea
-                    }
-                );
-            }
+            // set minDistanceToEdge 0f to avoid issue with stretching (otherwise it fails)
+            return MRUKExtension.GetAnchorSurfaces(surfaceTypes, 0f, anchor, ref totalUsableSurfaceArea);
         }
     }
 }

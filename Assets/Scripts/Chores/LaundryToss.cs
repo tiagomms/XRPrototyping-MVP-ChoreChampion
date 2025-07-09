@@ -1,9 +1,24 @@
+using System;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Chores
 {
     public class LaundryToss : Chore
     {
+        [SerializeField] private TextMeshPro scoreText;
+        public UnityEvent onMiniGameStarted = new();
+        public bool autoStart = false;
+
+        private void Start()
+        {
+            if (autoStart)
+            {
+                StarMiniGameChore();
+            }
+        }
+
         protected override void StartTutorial()
         {
             Debug.Log("Starting tutorial for Example Chore");
@@ -11,12 +26,16 @@ namespace Chores
 
         public override void StarMiniGameChore()
         {
-            Debug.Log("Starting Minigame for Example Chore");
+            isChoreActive = true;
+            score = 0f;
+            timeElapsed = 0f;
+            onMiniGameStarted.Invoke();
+            Debug.Log("Starting Example Chore minigame!");
         }
 
-        public override void CompleteChore()
+        public override void CompleteChore(bool inTime = true)
         {
-            base.CompleteChore();
+            base.CompleteChore(inTime);
             Debug.Log("Example Chore completed!");
         }
 
@@ -24,6 +43,18 @@ namespace Chores
         {
             onChoreEnded.Invoke();
             Debug.Log("Example Chore Ended!");
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+            if (!isChoreActive) return;
+        }
+
+        public void AddScore()
+        {
+            if (!isChoreActive) return;
+            score += 10f;
         }
     }
 }

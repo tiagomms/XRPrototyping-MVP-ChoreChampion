@@ -72,6 +72,6 @@ public class TestDustCubeMesh : MonoBehaviour
     {
         transform.DOScale(Vector3.zero, scaleAnimDuration)
             .SetEase(Ease.InBack)
-            .OnComplete(() => Destroy(_dustParticle.gameObject));
+            .OnComplete(() => _dustParticle.Delete());
     }
 } 

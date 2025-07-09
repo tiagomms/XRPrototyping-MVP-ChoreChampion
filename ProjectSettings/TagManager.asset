@@ -15,11 +15,12 @@ TagManager:
   - QDSUIToggleBorderlessButton
   - QDSUIIcon
   - QDSUITextSecondaryColor
+  - Marker
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Overlay UI
   - Water
   - UI
   - IgnorePlayer
@@ -46,9 +47,7 @@ TagManager:
   - 
   - 
   - 
-  - 
-  - 
-  - 
+
   m_SortingLayers:
   - name: Default
     uniqueID: 0

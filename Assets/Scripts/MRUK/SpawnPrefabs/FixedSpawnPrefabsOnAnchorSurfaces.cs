@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using Meta.XR.MRUtilityKit;
+using NaughtyAttributes;
 
 namespace ChoreChampion.XR.MRUtilityKit
 {
@@ -9,6 +10,24 @@ namespace ChoreChampion.XR.MRUtilityKit
     /// </summary>
     public class FixedSpawnPrefabsOnAnchorSurfaces : BaseSpawnPrefabsOnAnchorSurfaces
     {
+        protected enum SpawnBasedOn
+        {
+            
+            AnchorTransform = 0,
+            UserPosition = 1
+        }
+
+        [Space]
+        [Header("Fixed Spawn Variables")]
+        [SerializeField, Tooltip("Spawn things based on user position or Anchor transform")]
+        protected SpawnBasedOn spawnBasedOn;
+
+        [SerializeField, Tooltip("On spawn based on user position, where it should spawn"), HideIf(nameof(spawnBasedOn), SpawnBasedOn.AnchorTransform)]
+        protected MRUKExtension.SnapTarget snapTarget = MRUKExtension.SnapTarget.NearestEdge;
+
+        [SerializeField, Tooltip("On spawn based on user position, given the local position provided, clamp value in axis"), HideIf(nameof(spawnBasedOn), SpawnBasedOn.AnchorTransform)]
+        protected MRUKExtension.Clamp2DValues clampLocalPositions = MRUKExtension.Clamp2DValues.None;
+
         /// <summary>
         /// List of fixed local positions to spawn prefabs at. Cycles through this list when spawn amount exceeds list size.
         /// </summary>
@@ -37,8 +56,9 @@ namespace ChoreChampion.XR.MRUtilityKit
         [SerializeField, Tooltip("Incremental offset adjustment per iteration on the normal direction.")]
         protected float incrementalOffsetPerIteration = 0.002f;
 
-        protected virtual void OnValidate()
+        protected override void OnValidate()
         {
+            base.OnValidate();
             MaxIterations = 10; // since positions are fixed it does not make sense to iterate further
         }
 
@@ -62,10 +82,11 @@ namespace ChoreChampion.XR.MRUtilityKit
         /// <returns>True if position was calculated successfully, false otherwise.</returns>
         protected override bool CalculateSpawnPositionAndNormal(MRUK.SurfaceType surfaceType, MRUKAnchor anchor, out Vector3 spawnPosition, out Vector3 spawnNormal, int iteration = 0)
         {
+            spawnPosition = Vector3.zero;
+            spawnNormal = Vector3.zero;
+
             if (fixedLocalPositions.Count == 0)
             {
-                spawnPosition = Vector3.zero;
-                spawnNormal = Vector3.zero;
                 return false;
             }
 
@@ -81,8 +102,8 @@ namespace ChoreChampion.XR.MRUtilityKit
                 ShufflePositions();
             }
 
-            // Use fixed positioning
-            if (GenerateFixedPositionOnSpecificSurfaceAnchor(surfaceType, localPosition, _minRadius, anchor, out var pos, out var normal))
+            // 
+            if (TryGeneratePositionOnSpecificSurfaceAnchor(surfaceType, anchor, out Vector3 pos, out Vector3 normal, iteration, localPosition))
             {
                 // Calculate incremental offset based on iteration
                 float incrementalOffset = iteration * incrementalOffsetPerIteration;
@@ -91,9 +112,22 @@ namespace ChoreChampion.XR.MRUtilityKit
                 return true;
             }
 
-            spawnPosition = Vector3.zero;
-            spawnNormal = Vector3.zero;
             return false;
+        }
+
+        // In my extensions this will be the bit that changes
+        protected virtual bool TryGeneratePositionOnSpecificSurfaceAnchor(MRUK.SurfaceType surfaceType, MRUKAnchor anchor, out Vector3 pos, out Vector3 normal, int iteration, Vector2 localPosition)
+        {
+            if (spawnBasedOn == SpawnBasedOn.AnchorTransform)
+            {
+                // This case: Use fixed positioning based on anchor local space
+                return GenerateFixedPositionOnSpecificSurfaceAnchor(surfaceType, localPosition, _minRadius, anchor, out pos, out normal);
+            }
+            else
+            {
+                return GenerateClosestPositionOnSpecificSurfaceAnchor(surfaceType, localPosition, _minRadius, anchor, out pos, out normal, snapTarget, clampLocalPositions);
+            }
+
         }
 
         /// <summary>

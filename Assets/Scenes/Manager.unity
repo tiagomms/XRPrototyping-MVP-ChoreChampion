@@ -8165,7 +8165,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &338305549
 Transform:
   m_ObjectHideFlags: 0
@@ -11689,7 +11689,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5824888959264055624, guid: 4bf459842f45eb648a8e314fa01c55b6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1101989638}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5824888960955096574, guid: 4bf459842f45eb648a8e314fa01c55b6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: 4bf459842f45eb648a8e314fa01c55b6, type: 3}
 --- !u!4 &447835002 stripped
 Transform:
@@ -15374,7 +15377,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &645408708
 Transform:
   m_ObjectHideFlags: 0
@@ -18032,7 +18035,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5824888959264055624, guid: 4bf459842f45eb648a8e314fa01c55b6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 817765760}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5824888960955096574, guid: 4bf459842f45eb648a8e314fa01c55b6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: 4bf459842f45eb648a8e314fa01c55b6, type: 3}
 --- !u!4 &791777549 stripped
 Transform:
@@ -22002,7 +22008,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1038299915
 Transform:
   m_ObjectHideFlags: 0
@@ -24156,6 +24162,7 @@ MonoBehaviour:
   choreId: 3
   choreName: FoldingClothes
   choreDescription: Chore to help you to learn how to folding
+  choreTimer: 10
   onChoreActive:
     m_PersistentCalls:
       m_Calls:
@@ -24171,6 +24178,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
+  onChoreTimesUp:
+    m_PersistentCalls:
+      m_Calls: []
   onChoreCompleted:
     m_PersistentCalls:
       m_Calls: []
@@ -24189,6 +24199,12 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  scoreText: {fileID: 0}
+  timerText: {fileID: 0}
+  onMiniGameStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  autoStart: 0
 --- !u!114 &1161502480
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24204,6 +24220,7 @@ MonoBehaviour:
   choreId: 2
   choreName: LaundryToss
   choreDescription: Help you to organizze your laundry clothes
+  choreTimer: 10
   onChoreActive:
     m_PersistentCalls:
       m_Calls:
@@ -24219,6 +24236,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
+  onChoreTimesUp:
+    m_PersistentCalls:
+      m_Calls: []
   onChoreCompleted:
     m_PersistentCalls:
       m_Calls: []
@@ -24237,6 +24257,12 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  scoreText: {fileID: 0}
+  timerText: {fileID: 0}
+  onMiniGameStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  autoStart: 0
 --- !u!114 &1161502481
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24252,6 +24278,7 @@ MonoBehaviour:
   choreId: 1
   choreName: SpotTheMess
   choreDescription: Chore to clean the dust
+  choreTimer: 10
   onChoreActive:
     m_PersistentCalls:
       m_Calls:
@@ -24267,6 +24294,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
+  onChoreTimesUp:
+    m_PersistentCalls:
+      m_Calls: []
   onChoreCompleted:
     m_PersistentCalls:
       m_Calls: []
@@ -24285,6 +24315,20 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  pointSystem: {fileID: 0}
+  xtdAnchorPrefabSpawner: {fileID: 0}
+  tapAnchorMechanism: {fileID: 0}
+  randomMonsterSpawner: {fileID: 0}
+  removeMonstersOnTimesUp: 1
+  startMenu: {fileID: 0}
+  selectGameTypeMenu: {fileID: 0}
+  selectSurfaceMenu: {fileID: 0}
+  inGameUI: {fileID: 0}
+  endGameUI: {fileID: 0}
+  uiManager: {fileID: 0}
+  onSelectGameAnchor:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1169489479
 GameObject:
   m_ObjectHideFlags: 0
@@ -31909,7 +31953,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1458956777
 Transform:
   m_ObjectHideFlags: 0
@@ -34447,7 +34491,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5824888959264055624, guid: 4bf459842f45eb648a8e314fa01c55b6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 539430608}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5824888960955096574, guid: 4bf459842f45eb648a8e314fa01c55b6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: 4bf459842f45eb648a8e314fa01c55b6, type: 3}
 --- !u!4 &1607562368 stripped
 Transform:
