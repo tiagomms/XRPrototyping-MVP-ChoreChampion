@@ -20,9 +20,18 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/Daniel/LaundryToss2.unity
     guid: 07e979fcb05692b48aa888c7b0643336
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Daniel/LaundryTossWorking.unity
     guid: ec52fd5d664be714da93d14e74538aac
+  - enabled: 0
+    path: Assets/Scenes/SimpleMenu.unity
+    guid: 4954e6242679e9a4ab5ed335874bc8df
+  - enabled: 1
+    path: Assets/Scenes/TheLastOfDust.unity
+    guid: 73fd5c8f5a237984fb0a9024436dc061
+  - enabled: 1
+    path: Assets/Scenes/Daniel/TIDY TOSS.unity
+    guid: 6729dfdbf614d3547968a42430773548
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 3d9205113d6907e46b1cf38f90daf995, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
