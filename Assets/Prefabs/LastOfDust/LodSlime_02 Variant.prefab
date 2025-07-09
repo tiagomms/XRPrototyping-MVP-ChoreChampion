@@ -62,9 +62,6 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 2795397902362475942, guid: 72c47fdc43d84b243bdc109c284341d6, type: 3}
       insertIndex: -1
-      addedObject: {fileID: -168260388206793015}
-    - targetCorrespondingSourceObject: {fileID: 2795397902362475942, guid: 72c47fdc43d84b243bdc109c284341d6, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 9033580971077890293}
     - targetCorrespondingSourceObject: {fileID: 2795397902362475942, guid: 72c47fdc43d84b243bdc109c284341d6, type: 3}
       insertIndex: -1
@@ -95,21 +92,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 2795397902362475942, guid: 72c47fdc43d84b243bdc109c284341d6, type: 3}
   m_PrefabInstance: {fileID: 3113057318814691377}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &-168260388206793015
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1006821387283647895}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f7612403dc8216541a68991b55e5ad35, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  toStartRotated: 1
-  DoUpdate: 0
-  rotationSpeed: 0.1
 --- !u!114 &9033580971077890293
 MonoBehaviour:
   m_ObjectHideFlags: 0

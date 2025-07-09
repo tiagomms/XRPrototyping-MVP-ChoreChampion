@@ -13,6 +13,8 @@ namespace LastOfDust
         public BaseWipingObject WipingObj {get; private set;}
         public NavMeshAgent Agent { get; private set; }
 
+        [SerializeField] private float maxRotationOffset = 180f;
+
         private void Awake()
         {
             WipingObj = GetComponent<BaseWipingObject>();
@@ -21,6 +23,11 @@ namespace LastOfDust
         }
         private void Start()
         {
+            // Randomly rotate on the Y axis by up to ±maxRotationOffset degrees from the current rotation
+            float randomOffset = Random.Range(-maxRotationOffset, maxRotationOffset);
+            Quaternion yRotation = Quaternion.Euler(0f, randomOffset, 0f);
+            transform.rotation = yRotation * transform.rotation;
+
             WipingObj.InitializeColliders(GetComponentsInChildren<Collider>());
         }
 
