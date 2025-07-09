@@ -18,13 +18,23 @@
  * limitations under the License.
  */
 
+using NaughtyAttributes;
 using UnityEngine;
 
 namespace Utils
 {
     public class SimpleBillboard : MonoBehaviour
     {
-        [Header("Rotation Settings")]
+
+        [SerializeField]
+        [Tooltip("If true, the object will rotate to face the camera immediately on Start.")]
+        protected bool toStartRotated = false;
+
+        [SerializeField]
+        [Tooltip("If false, disables the Update rotation behavior.")]
+        public bool DoUpdate = true;
+
+        [ShowIf("DoUpdate"), Header("Rotation Settings")]
         [SerializeField, Range(0f, 1f)] protected float rotationSpeed = 0.1f;
 
         protected Camera _mainCamera;
@@ -34,12 +44,34 @@ namespace Utils
         {
             _mainCamera = Camera.main;
             _targetRotation = transform.rotation;
+
+            // If toStartRotated is true, rotate immediately to face the camera
+            if (toStartRotated)
+            {
+                Vector3 direction = GetDirection();
+                transform.rotation = Quaternion.LookRotation(direction);
+            }
         }
 
         protected virtual void Update()
         {
-            var direction = transform.position - _mainCamera.transform.position;
-            LookTowards(direction);
+            // If DoUpdate is false, skip Update logic
+            if (!DoUpdate)
+            {
+                return;
+            }
+
+            Vector3 direction = GetDirection();
+            // If the direction is too small, don't rotate (avoids errors)
+            if (direction.sqrMagnitude < 0.001f)
+                return;
+
+            LookTowards(direction.normalized);
+        }
+
+        protected virtual Vector3 GetDirection()
+        {
+            return transform.position - _mainCamera.transform.position;
         }
 
         protected void LookTowards(Vector3 direction)

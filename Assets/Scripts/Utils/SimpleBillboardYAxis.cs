@@ -24,17 +24,12 @@ namespace Utils
 {
     public class SimpleBillboardYAxis : SimpleBillboard
     {
-        protected override void Update()
+        protected override Vector3 GetDirection()
         {
             var direction = transform.position - _mainCamera.transform.position;
             // Flatten the direction vector so it only rotates around Y
             direction.y = 0f;
-
-            // If the direction is too small, don't rotate (avoids errors)
-            if (direction.sqrMagnitude < 0.001f)
-                return;
-
-            LookTowards(direction.normalized);
+            return direction;
         }
     }
 }
