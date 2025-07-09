@@ -62,6 +62,9 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 7099655024501674456, guid: 8760cc9eb30a2b340b14499b6e150dc4, type: 3}
       insertIndex: -1
+      addedObject: {fileID: -29019113423235564}
+    - targetCorrespondingSourceObject: {fileID: 7099655024501674456, guid: 8760cc9eb30a2b340b14499b6e150dc4, type: 3}
+      insertIndex: -1
       addedObject: {fileID: 7535200383170749566}
     - targetCorrespondingSourceObject: {fileID: 7099655024501674456, guid: 8760cc9eb30a2b340b14499b6e150dc4, type: 3}
       insertIndex: -1
@@ -87,6 +90,21 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 7099655024501674456, guid: 8760cc9eb30a2b340b14499b6e150dc4, type: 3}
   m_PrefabInstance: {fileID: 5788863290762152406}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &-29019113423235564
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3661750711517976590}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7612403dc8216541a68991b55e5ad35, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  toStartRotated: 1
+  DoUpdate: 0
+  rotationSpeed: 0.1
 --- !u!114 &7535200383170749566
 MonoBehaviour:
   m_ObjectHideFlags: 0
