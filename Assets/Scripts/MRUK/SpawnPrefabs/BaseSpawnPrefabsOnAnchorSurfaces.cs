@@ -663,9 +663,10 @@ namespace ChoreChampion.XR.MRUtilityKit
         /// <returns>True to continue spawning, false to stop (for moving existing objects).</returns>
         protected virtual bool InstantiateOrMoveObject(MRUKAnchor anchor, MRUKExtension.Surface surface, Vector3 spawnPosition, Quaternion spawnRotation)
         {
-            // Instantiate new object - temporarily under anchor parent
+            // Instantiate new object - first with no parent (so no scale impact), then temporarily under anchor parent
+            GameObject spawnedObject = Instantiate(SpawnObject, spawnPosition, spawnRotation, null);
             Transform tempParentTransform = GetAnchorGameObjectTransform(anchor);
-            GameObject spawnedObject = Instantiate(SpawnObject, spawnPosition, spawnRotation, tempParentTransform);
+            spawnedObject.transform.SetParent(tempParentTransform);
 
             // the reason is to be able to have straight rotations in the anchor itself - if needed through this boolean 
             if (straightPlacement)
@@ -791,6 +792,22 @@ namespace ChoreChampion.XR.MRUtilityKit
             //return transform.childCount;
         }
 
+        /// <summary>
+        /// Gets a list of all MRUKSpawnedObjects from all anchors and surfaces in _anchorsSurfaceData using LINQ.
+        /// </summary>
+        /// <returns>A List containing all MRUKSpawnedObjects currently tracked.</returns>
+        public List<MRUKSpawnedObject> GetAllSpawnedObjects()
+        {
+            if (_anchorsSurfaceData == null)
+            {
+                return new List<MRUKSpawnedObject>();
+            }
+            return _anchorsSurfaceData.Values
+                .SelectMany(anchorData => anchorData.SpawnedObjectsPerSurface.Values)
+                .SelectMany(surfaceSet => surfaceSet)
+                .ToList();
+        }
+
         [Button]
         public virtual void ClearSpawnedObjects()
         {
@@ -798,5 +815,7 @@ namespace ChoreChampion.XR.MRUtilityKit
             
             _anchorsSurfaceData.Values.ToList().ForEach(a => a.ClearSpawnedObjectsInAnchor());
         }
+
+        
     }
 }
