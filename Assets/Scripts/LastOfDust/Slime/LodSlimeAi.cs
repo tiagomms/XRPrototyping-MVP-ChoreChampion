@@ -1,12 +1,17 @@
+using System;
 using ChoreChampion.XR.MRUtilityKit;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace LastOfDust
 {
     public class LodSlimeAi : KawaiiSlimeAi
     {
         private BaseWipingObject _wipingObj;
+        private LodSlime _lodSlime;
+        [SerializeField] private MRUKSpawnedObject _mrukSpawnedObject;
+        private bool _hasBeenKilled;
 
         /// <summary>
         /// Minimum Y scale when flattened.
@@ -25,6 +30,8 @@ namespace LastOfDust
         /// </summary>
         [SerializeField]
         private float scaleAnimDuration = 0.5f;
+
+        public UnityEvent onDeadAnimationEnded;
 
         // NOTE: lazy approach - please do doublecheck
         /*
@@ -48,9 +55,11 @@ namespace LastOfDust
         /// <summary>
         /// Unity Awake: Store default scale and subscribe to events.
         /// </summary>
-        protected void Awake()
+        protected void OnEnable()
         {
-            _wipingObj = GetComponentInParent<BaseWipingObject>();
+            _wipingObj = GetComponent<BaseWipingObject>();
+            _lodSlime = GetComponent<LodSlime>();
+            _mrukSpawnedObject = GetComponentInParent<MRUKSpawnedObject>();
 
             defaultScale = transform.localScale;
         }
@@ -122,7 +131,8 @@ namespace LastOfDust
         /// </summary>
         private void AnimateKillAndDestroy()
         {
-            Damaged(GetDamageType(0));
+            _hasBeenKilled = true;
+            Damaged(GetDamageType(0f));
         }
 
         protected override void OnAnimationDamageEnded()
@@ -131,13 +141,16 @@ namespace LastOfDust
             //if it > 1 AI will back to first position 
 
             // if died - or dmg type 2
-            if (_wipingObj.LifePoints == 0)
+            if (_hasBeenKilled) // wipingObj.LifePoints == 0
             {
+                //Debug.Log($"Animation Damage Ended - KILLED - mrukSpawnedObject exists: {_mrukSpawnedObject != null}");
+                if (_mrukSpawnedObject != null)
+                {
+                    _mrukSpawnedObject.Delete();
+                }
+                onDeadAnimationEnded.Invoke();
+
                 animator.speed = 0f; // stop animator let it die
-                transform.SetParent(null);
-                transform.DOScale(Vector3.zero, scaleAnimDuration)
-                                .SetEase(Ease.InBack)
-                                .OnComplete(() => _wipingObj.Delete());
                 return;
             }
 
@@ -145,5 +158,16 @@ namespace LastOfDust
         }
 
 
+        private void OnDestroy()
+        {
+            onDeadAnimationEnded.RemoveAllListeners();
+        }
+
+        // FIXME: initialize does not work on multiple spawn and random things - it just initialzes on the wrong one
+        public void Initialize(MRUKSpawnedObject spawnedObject)
+        {
+            _mrukSpawnedObject = spawnedObject;
+            //Debug.Log($"{nameof(LodSlimeAi)} Initialized");
+        }
     }
 }

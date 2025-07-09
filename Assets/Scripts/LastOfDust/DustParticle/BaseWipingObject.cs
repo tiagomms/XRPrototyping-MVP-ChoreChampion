@@ -9,7 +9,7 @@ using System.Linq;
 /// Does NOT implement trigger or collision logic; derived classes must handle those.
 /// </summary>
 [RequireComponent(typeof(Rigidbody))]
-public abstract class BaseWipingObject : MRUKSpawnedObject
+public abstract class BaseWipingObject : MonoBehaviour
 {
     /// <summary>
     /// All child colliders of this dust particle.
@@ -129,9 +129,8 @@ public abstract class BaseWipingObject : MRUKSpawnedObject
         return interactionLayerMask.IsLayerInMask(layer);
     }
 
-    protected override void OnDestroy()
+    protected void OnDestroy()
     {
-        base.OnDestroy();
         onDustParticleHit.RemoveAllListeners();
         onDustParticleKilled.RemoveAllListeners();
     }

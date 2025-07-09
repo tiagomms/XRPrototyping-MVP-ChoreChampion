@@ -35,13 +35,19 @@ public class KawaiiSlimeAi : MonoBehaviour
     }
     public void WalkToNextDestination()
     {
-        if (agent == null || !agent.isOnNavMesh || waypoints.Length == 0) { CancelGoNextDestination(); return; }
+        if (IsAgentOn() || waypoints.Length == 0) { CancelGoNextDestination(); return; }
 
         currentState = SlimeAnimationState.Walk;
         m_CurrentWaypointIndex = (m_CurrentWaypointIndex + 1) % waypoints.Length;
         agent.SetDestination(waypoints[m_CurrentWaypointIndex].position);
         SetFace(faces.WalkFace);
     }
+
+    private bool IsAgentOn()
+    {
+        return agent == null || !agent.enabled || !agent.isOnNavMesh;
+    }
+
     public void CancelGoNextDestination() => CancelInvoke(nameof(WalkToNextDestination));
 
     protected void SetFace(Texture tex)
@@ -63,7 +69,7 @@ public class KawaiiSlimeAi : MonoBehaviour
             case SlimeAnimationState.Walk:
 
                 if (animator.GetCurrentAnimatorStateInfo(0).IsName("Walk")) return;
-                if (agent == null || !agent.isOnNavMesh) { currentState = SlimeAnimationState.Idle; return; }
+                if (IsAgentOn()) { currentState = SlimeAnimationState.Idle; return; }
 
                 agent.isStopped = false;
                 agent.updateRotation = true;
@@ -152,7 +158,7 @@ public class KawaiiSlimeAi : MonoBehaviour
     protected virtual void StopAgent()
     {
         animator.SetFloat("Speed", 0);
-        if (agent == null || !agent.isOnNavMesh) return;
+        if (IsAgentOn()) return;
 
         agent.isStopped = true;
         agent.updateRotation = false;
@@ -197,7 +203,7 @@ public class KawaiiSlimeAi : MonoBehaviour
     {
         // apply root motion to AI
         Vector3 position = animator.rootPosition;
-        if (agent == null || !agent.isOnNavMesh) return;
+        if (IsAgentOn()) return;
         position.y = agent.nextPosition.y;
         transform.position = position;
         agent.nextPosition = transform.position;

@@ -8,12 +8,14 @@ using UnityEngine.AI;
 
 namespace LastOfDust
 {
-    public class LodSlime : MRUKSpawnedObject
+    public class LodSlime : MonoBehaviour
     {
-        public BaseWipingObject WipingObj {get; private set;}
+        public BaseWipingObject WipingObj { get; private set; }
         public NavMeshAgent Agent { get; private set; }
 
-        [SerializeField] private float maxRotationOffset = 180f;
+        private MRUKSpawnedObject mrukSpawnedObject;
+
+        [SerializeField] private int maxRotationOffset = 45;
 
         private void Awake()
         {
@@ -23,18 +25,19 @@ namespace LastOfDust
         }
         private void Start()
         {
+            var random = new System.Random();
             // Randomly rotate on the Y axis by up to ±maxRotationOffset degrees from the current rotation
-            float randomOffset = Random.Range(-maxRotationOffset, maxRotationOffset);
+            float randomOffset = random.Next(-maxRotationOffset, maxRotationOffset);
             Quaternion yRotation = Quaternion.Euler(0f, randomOffset, 0f);
             transform.rotation = yRotation * transform.rotation;
-
             WipingObj.InitializeColliders(GetComponentsInChildren<Collider>());
         }
 
-        public override void Initialize(MRUKAnchor anchor, MRUKExtension.Surface surface)
+        public void Initialize(MRUKSpawnedObject spawnedObject)
         {
-            base.Initialize(anchor, surface);
-            Agent.enabled = true;
+            Agent.enabled = false; // right now disabled due to bugs with scene navigation
+            mrukSpawnedObject = spawnedObject;
+            //Debug.Log($"{nameof(LodSlime)} Initialized");
         }
     }
 }

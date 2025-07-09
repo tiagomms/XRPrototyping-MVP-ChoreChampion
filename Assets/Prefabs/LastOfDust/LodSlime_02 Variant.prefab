@@ -62,6 +62,9 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 2795397902362475942, guid: 72c47fdc43d84b243bdc109c284341d6, type: 3}
       insertIndex: -1
+      addedObject: {fileID: -3762017211050019876}
+    - targetCorrespondingSourceObject: {fileID: 2795397902362475942, guid: 72c47fdc43d84b243bdc109c284341d6, type: 3}
+      insertIndex: -1
       addedObject: {fileID: 9033580971077890293}
     - targetCorrespondingSourceObject: {fileID: 2795397902362475942, guid: 72c47fdc43d84b243bdc109c284341d6, type: 3}
       insertIndex: -1
@@ -78,9 +81,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2795397902362475942, guid: 72c47fdc43d84b243bdc109c284341d6, type: 3}
       insertIndex: -1
       addedObject: {fileID: -213972202614876962}
-    - targetCorrespondingSourceObject: {fileID: 2795397902362475942, guid: 72c47fdc43d84b243bdc109c284341d6, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: -3762017211050019876}
   m_SourcePrefab: {fileID: 100100000, guid: 72c47fdc43d84b243bdc109c284341d6, type: 3}
 --- !u!1 &68897211539040251 stripped
 GameObject:
@@ -92,6 +92,38 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 2795397902362475942, guid: 72c47fdc43d84b243bdc109c284341d6, type: 3}
   m_PrefabInstance: {fileID: 3113057318814691377}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &-3762017211050019876
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1006821387283647895}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ccf272341e604ae42a7a8e6b284ee07a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onInitialized:
+    m_PersistentCalls:
+      m_Calls: []
+  onDestroyed:
+    m_PersistentCalls:
+      m_Calls: []
+  childColliders:
+  - {fileID: 1763208766984616239}
+  interactionLayerMask:
+    serializedVersion: 2
+    m_Bits: 128
+  maxLifePoints: 3
+  onDustParticleHit:
+    m_PersistentCalls:
+      m_Calls: []
+  onDustParticleKilled:
+    m_PersistentCalls:
+      m_Calls: []
+  hitCooldown: 0.2
+  collisionForceThreshold: 3
 --- !u!114 &9033580971077890293
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -104,12 +136,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22215542aedd1da4bb9319c9269bdcea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  onInitialized:
-    m_PersistentCalls:
-      m_Calls: []
-  onDestroyed:
-    m_PersistentCalls:
-      m_Calls: []
   maxRotationOffset: 45
 --- !u!114 &1299434411206089707
 MonoBehaviour:
@@ -225,35 +251,3 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
---- !u!114 &-3762017211050019876
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1006821387283647895}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ccf272341e604ae42a7a8e6b284ee07a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  onInitialized:
-    m_PersistentCalls:
-      m_Calls: []
-  onDestroyed:
-    m_PersistentCalls:
-      m_Calls: []
-  childColliders:
-  - {fileID: 1763208766984616239}
-  interactionLayerMask:
-    serializedVersion: 2
-    m_Bits: 128
-  maxLifePoints: 3
-  onDustParticleHit:
-    m_PersistentCalls:
-      m_Calls: []
-  onDustParticleKilled:
-    m_PersistentCalls:
-      m_Calls: []
-  hitCooldown: 0.2
-  collisionForceThreshold: 3
