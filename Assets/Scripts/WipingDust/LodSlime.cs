@@ -10,22 +10,18 @@ namespace LastOfDust
 {
     public class LodSlime : MRUKSpawnedObject
     {
-        [SerializeField] private BaseWipingObject wipingObj;
-        public BaseWipingObject WipingObj => wipingObj;
-
-        
+        public BaseWipingObject WipingObj {get; private set;}
         public NavMeshAgent Agent { get; private set; }
-        private GameObject _slimeObj;
 
         private void Awake()
         {
-            _slimeObj = Utils.RandomChildActivator.ActivateRandomChild(transform);
-            Agent = _slimeObj.GetComponent<NavMeshAgent>();
+            WipingObj = GetComponent<BaseWipingObject>();
+            Agent = GetComponent<NavMeshAgent>();
             Agent.enabled = false; // only enable on initialize
         }
         private void Start()
         {
-            //wipingObj.InitializeColliders(_slimeObj.GetComponentsInChildren<Collider>());
+            WipingObj.InitializeColliders(GetComponentsInChildren<Collider>());
         }
 
         public override void Initialize(MRUKAnchor anchor, MRUKExtension.Surface surface)
