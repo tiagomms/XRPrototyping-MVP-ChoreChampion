@@ -6,6 +6,10 @@ using Meta.XR.MRUtilityKit;
 using UnityEngine.Events;
 using System;
 using UI;
+using System.Collections.Generic;
+using UnityEngine.AI;
+using System.Linq;
+using LastOfDust;
 
 namespace Chores
 {
@@ -13,6 +17,10 @@ namespace Chores
     {
         [Header("Score System")]
         [SerializeField] private LastOfDustPointSystem pointSystem;
+
+        [Header("Scene Navigation")]
+        [SerializeField] private SceneNavigation sceneNav;
+        public SceneNavigation SceneNav => sceneNav;
 
         [Header("Spawners")]
         [SerializeField] private ExtendedAnchorPrefabSpawner xtdAnchorPrefabSpawner;
@@ -104,6 +112,16 @@ namespace Chores
             {
                 randomMonsterSpawner.SpawnOnAnchor(_selectedGameAnchor);
             }
+            
+            // all of them are spawned in 
+            sceneNav.Agents = randomMonsterSpawner.gameObject.GetComponentsInChildren<NavMeshAgent>().ToList();
+            /*
+            allSlimes = randomMonsterSpawner.GetAllSpawnedObjects()
+                .Select(obj => obj.GetComponent<LodSlime>())
+                .Where(a => a != null)
+                .ToList();
+            */
+
         }
 
         public override void CompleteChore(bool inTime = true)
