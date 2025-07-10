@@ -45,12 +45,7 @@ namespace Chores
         // Singleton instance
         public static LastOfDustChore Instance { get; protected set; }
 
-        protected PlayModeEnum _playMode = PlayModeEnum.AllAreas;
-        public PlayModeEnum PlayMode
-        {
-            get => _playMode;
-            set => _playMode = value;
-        }
+        public PlayModeEnum PlayMode { get; protected set; } = PlayModeEnum.AllAreas;
 
         public UnityEvent<MRUKAnchor> onSelectGameAnchor;
         protected MRUKAnchor _selectedGameAnchor;
@@ -104,11 +99,11 @@ namespace Chores
 
             Debug.Log("Starting Minigame for Example Chore");
 
-            if (_playMode == PlayModeEnum.AllAreas)
+            if (PlayMode == PlayModeEnum.AllAreas)
             {
                 randomMonsterSpawner.SpawnOnAllAnchors();
             }
-            else if (_playMode == PlayModeEnum.SelectArea)
+            else if (PlayMode == PlayModeEnum.SelectArea)
             {
                 randomMonsterSpawner.SpawnOnAnchor(_selectedGameAnchor);
             }
@@ -146,13 +141,27 @@ namespace Chores
         {
             uiManager.GoTo(selectGameTypeMenu);
         }
+
+        public void AfterGameTypeSelection(PlayModeEnum? newPlayMode)
+        {
+            if (newPlayMode == null) return;
+            if (newPlayMode == PlayModeEnum.AllAreas)
+            {
+                StartDeepCleanGameMode();
+            }
+            else if (newPlayMode == PlayModeEnum.SelectArea)
+            {
+                InitializeSurfaceSelection();
+            }
+            
+        }
         #endregion
 
         #region 02-Select Game Type
 
         public void StartDeepCleanGameMode()
         {
-            _playMode = PlayModeEnum.AllAreas;
+            PlayMode = PlayModeEnum.AllAreas;
             uiManager.GoTo(inGameUI);
             StartChore(true);
         }
@@ -169,7 +178,7 @@ namespace Chores
 
         public virtual void GameAreaSelected(MRUKAnchor anchor)
         {
-            _playMode = PlayModeEnum.SelectArea;
+            PlayMode = PlayModeEnum.SelectArea;
 
             _selectedGameAnchor = anchor;
             onSelectGameAnchor?.Invoke(anchor);
@@ -248,9 +257,14 @@ namespace Chores
             randomMonsterSpawner.ClearSpawnedObjects();
             tapAnchorMechanism.ClearSpawnedObjects();
 
-            _playMode = PlayModeEnum.AllAreas;
+            PlayMode = PlayModeEnum.AllAreas;
             _selectedGameAnchor = null;
             onSelectGameAnchor?.Invoke(null);
+        }
+
+        public void SelectPlayMode(PlayModeEnum playMode)
+        {
+            PlayMode = playMode;
         }
 
     }

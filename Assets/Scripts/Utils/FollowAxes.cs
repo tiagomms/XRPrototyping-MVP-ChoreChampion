@@ -23,6 +23,27 @@ namespace Utils
         public float yOffset = 0f;
         public float zOffset = 0f;
 
+        private void OnValidate()
+        {
+            // Find center eye transform - prioritize "CenterEyeAnchor" GameObject, fallback to first Camera
+            if (target == null)
+            {
+                GameObject centerEyeAnchor = GameObject.Find("CenterEyeAnchor");
+                if (centerEyeAnchor != null)
+                {
+                    target = centerEyeAnchor.transform;
+                }
+                else
+                {
+                    GameObject firstCamera = GameObject.FindWithTag("MainCamera");
+                    if (firstCamera != null)
+                    {
+                        target = firstCamera.transform;
+                    }
+                }
+            }
+        } 
+
         private void Update()
         {
             if (target == null) return;
