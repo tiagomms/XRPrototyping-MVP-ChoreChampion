@@ -4,6 +4,7 @@ public class PlaceObjectFrontOfUser : MonoBehaviour
 {
     [SerializeField] private Transform userTransform;
     [SerializeField] private float distanceFromUser = 1.5f;
+    [SerializeField] private float yDistance = 1f;
 
     private void Start()
     {
@@ -18,7 +19,7 @@ public class PlaceObjectFrontOfUser : MonoBehaviour
             return;
         }
 
-        Vector3 position = userTransform.position + userTransform.forward * distanceFromUser;
+        Vector3 position = userTransform.position + userTransform.forward * distanceFromUser + Vector3.up * yDistance;
         transform.position = position;
         transform.rotation = userTransform.rotation;
     }

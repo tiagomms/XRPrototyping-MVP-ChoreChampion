@@ -10682,6 +10682,11 @@ Transform:
   - {fileID: 1455117138}
   m_Father: {fileID: 35761792}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!223 &894219737 stripped
+Canvas:
+  m_CorrespondingSourceObject: {fileID: 3024039696868023780, guid: 2a420c4275432401eaff10023ea5e064, type: 3}
+  m_PrefabInstance: {fileID: 952788554}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &894756860
 GameObject:
   m_ObjectHideFlags: 0
@@ -11418,6 +11423,14 @@ PrefabInstance:
       propertyPath: webCamTextureManager
       value: 
       objectReference: {fileID: 1373946501}
+    - target: {fileID: 3024039696868023780, guid: 2a420c4275432401eaff10023ea5e064, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3525834007171471017, guid: 2a420c4275432401eaff10023ea5e064, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3525834007171471017, guid: 2a420c4275432401eaff10023ea5e064, type: 3}
       propertyPath: m_debugText
       value: 
@@ -11440,15 +11453,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6869619774982131591, guid: 2a420c4275432401eaff10023ea5e064, type: 3}
       propertyPath: m_LocalScale.x
-      value: 239.3
+      value: 239.30003
       objectReference: {fileID: 0}
     - target: {fileID: 6869619774982131591, guid: 2a420c4275432401eaff10023ea5e064, type: 3}
       propertyPath: m_LocalScale.y
-      value: 239.3
+      value: 239.30003
       objectReference: {fileID: 0}
     - target: {fileID: 6869619774982131591, guid: 2a420c4275432401eaff10023ea5e064, type: 3}
       propertyPath: m_LocalScale.z
-      value: 239.3
+      value: 239.30002
       objectReference: {fileID: 0}
     - target: {fileID: 6869619774982131591, guid: 2a420c4275432401eaff10023ea5e064, type: 3}
       propertyPath: m_LocalPosition.x
@@ -11468,11 +11481,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6869619774982131591, guid: 2a420c4275432401eaff10023ea5e064, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 6869619774982131591, guid: 2a420c4275432401eaff10023ea5e064, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 6869619774982131591, guid: 2a420c4275432401eaff10023ea5e064, type: 3}
       propertyPath: m_LocalRotation.z
@@ -14033,7 +14046,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1417706865955697895, guid: 59d1e3041b9182547bebb3f40e29e89c, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2203469117925761967, guid: 59d1e3041b9182547bebb3f40e29e89c, type: 3}
       propertyPath: m_IsActive
@@ -14053,7 +14066,7 @@ PrefabInstance:
       objectReference: {fileID: 1448293073}
     - target: {fileID: 2689504893421583097, guid: 59d1e3041b9182547bebb3f40e29e89c, type: 3}
       propertyPath: countdownTime
-      value: 60
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 2689504893421583097, guid: 59d1e3041b9182547bebb3f40e29e89c, type: 3}
       propertyPath: spawningDistance
@@ -21764,7 +21777,7 @@ MonoBehaviour:
   choreId: 2
   choreName: LaundryToss
   choreDescription: Help you to organizze your laundry clothes
-  choreTimer: 60
+  choreTimer: 30
   onChoreActive:
     m_PersistentCalls:
       m_Calls: []
@@ -21859,6 +21872,30 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
+      - m_Target: {fileID: 952788556}
+        m_TargetAssemblyTypeName: UnityEngine.Transform, UnityEngine
+        m_MethodName: SetParent
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 386980100}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Transform, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+      - m_Target: {fileID: 894219737}
+        m_TargetAssemblyTypeName: UnityEngine.Behaviour, UnityEngine
+        m_MethodName: set_enabled
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   onChoreEnded:
     m_PersistentCalls:
       m_Calls:
@@ -21890,6 +21927,18 @@ MonoBehaviour:
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 61162898}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
         m_CallState: 2
       - m_Target: {fileID: 1145506640}
         m_TargetAssemblyTypeName: CountDown, Assembly-CSharp
@@ -22098,15 +22147,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8991046756894328062, guid: 654a3529d23c74e54a195d95a769f239, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.01
+      value: 0.001
       objectReference: {fileID: 0}
     - target: {fileID: 8991046756894328062, guid: 654a3529d23c74e54a195d95a769f239, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.01
+      value: 0.001
       objectReference: {fileID: 0}
     - target: {fileID: 8991046756894328062, guid: 654a3529d23c74e54a195d95a769f239, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.01
+      value: 0.001
       objectReference: {fileID: 0}
     - target: {fileID: 8991046756894328062, guid: 654a3529d23c74e54a195d95a769f239, type: 3}
       propertyPath: m_LocalPosition.x
@@ -22185,8 +22234,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85ce40288fe24bbeaf7cb2b1aa480e5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  userTransform: {fileID: 1274104891}
+  userTransform: {fileID: 2082039012}
   distanceFromUser: 1.5
+  yDistance: 1.5
 --- !u!1 &1779287648
 GameObject:
   m_ObjectHideFlags: 0
