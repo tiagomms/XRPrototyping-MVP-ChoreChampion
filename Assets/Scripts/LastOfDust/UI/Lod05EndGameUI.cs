@@ -1,4 +1,5 @@
 using System;
+using ChoreChampion.UI;
 using Chores;
 using NaughtyAttributes;
 using UI;
@@ -16,8 +17,8 @@ namespace LastOfDust.UI
 
         // TODO: here UI team, you define what you want to do - I literally created 2 fake gameobjects for tests
         // NOTE: here it is unclear if they are different panels or text with changes, I assume game objects
-        [SerializeField] private GameObject gameLostSection;
-        [SerializeField] private GameObject gameWonSection;
+        [SerializeField] private EndGameUIReferences gameLostSection;
+        [SerializeField] private EndGameUIReferences gameWonSection;
 
         [SerializeField] private Lod03SurfaceSelectionScreenUI surfaceSelectionScreenUI;
 
@@ -85,8 +86,17 @@ namespace LastOfDust.UI
             bool timesUp = LastOfDustChore.Instance.ChoreCurrentTime == 0f;
 
             // TODO: here UI team, you define what you want to do - I literally created 2 fake gameobjects for tests
-            gameLostSection.SetActive(timesUp);
-            gameWonSection.SetActive(!timesUp);
+            gameLostSection.gameObject.SetActive(timesUp);
+            gameWonSection.gameObject.SetActive(!timesUp);
+
+            if (timesUp)
+            {
+                gameLostSection.SetResults(LastOfDustChore.Instance.Score, LastOfDustChore.Instance.TimeElapsed);
+            }
+            else
+            {
+                gameWonSection.SetResults(LastOfDustChore.Instance.Score, LastOfDustChore.Instance.TimeElapsed);
+            }
         }
 
     }

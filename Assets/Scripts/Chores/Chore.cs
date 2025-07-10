@@ -29,6 +29,7 @@ namespace Chores
         protected bool isChoreActive;
         public bool IsChoreActive => isChoreActive;
         protected float timeElapsed;
+        public float TimeElapsed => timeElapsed;
         protected float score;
         public float Score => score;
 

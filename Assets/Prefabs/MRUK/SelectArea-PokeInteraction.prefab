@@ -109,7 +109,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -0.01}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.02, y: 1.02, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 308364618024599425}
@@ -159,7 +159,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: d9665615562752448b5140038771d26c, type: 2}
+  - {fileID: 2100000, guid: 766f47a34a9a2cb48b834c8237d6a27a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -214,14 +214,14 @@ MonoBehaviour:
   _editor: {fileID: 1814462911240865375}
   _width: 1
   _height: 1
-  _color: {r: 1, g: 1, b: 1, a: 0.078431375}
-  _borderColor: {r: 0, g: 0, b: 0, a: 1}
-  _radiusTopLeft: 0.1
-  _radiusTopRight: 0.1
-  _radiusBottomLeft: 0.1
-  _radiusBottomRight: 0.1
-  _borderInnerRadius: 0
-  _borderOuterRadius: 0
+  _color: {r: 0, g: 0.52156866, b: 0.91764706, a: 0.07058824}
+  _borderColor: {r: 0.24705882, g: 0.76862746, b: 0.99607843, a: 0.7764706}
+  _radiusTopLeft: 0.05
+  _radiusTopRight: 0.05
+  _radiusBottomLeft: 0.05
+  _radiusBottomRight: 0.05
+  _borderInnerRadius: 0.02
+  _borderOuterRadius: 0.01
 --- !u!114 &6470192970112490401
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -370,7 +370,7 @@ Transform:
   m_GameObject: {fileID: 4090236087521173531}
   serializedVersion: 2
   m_LocalRotation: {x: 0.70710677, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0.01, z: 0}
+  m_LocalPosition: {x: 0, y: 0.05, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
