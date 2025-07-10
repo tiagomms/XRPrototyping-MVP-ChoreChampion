@@ -2,12 +2,13 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 
 namespace Chores
 {
     public class LaundryToss : Chore
     {
-        [SerializeField] private TextMeshPro scoreText;
+        [SerializeField] private TextMeshProUGUI scoreText;
         public UnityEvent onMiniGameStarted = new();
         public bool autoStart = false;
 
@@ -36,7 +37,13 @@ namespace Chores
         public override void CompleteChore(bool inTime = true)
         {
             base.CompleteChore(inTime);
+            scoreText.text = score.ToString();
             Debug.Log("Example Chore completed!");
+        }
+
+        public override void Reset()
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
 
         public override void EndChore()
