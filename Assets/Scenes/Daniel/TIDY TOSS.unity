@@ -9357,7 +9357,7 @@ MonoBehaviour:
   laundryToss: {fileID: 1752210170}
   particleSystem: {fileID: 1870245834}
   audioSource: {fileID: 762926404}
-  scoreVisual: {fileID: 2436538376568224976, guid: 7548984acdb1d0849abd06894b0a923c, type: 3}
+  scoreVisual: {fileID: 8370400869871024217, guid: 938b1378ed4e34980afdafa945036c3c, type: 3}
   scoreVisualPosition: {fileID: 899385082}
   ttl: 2
 --- !u!65 &762926399
