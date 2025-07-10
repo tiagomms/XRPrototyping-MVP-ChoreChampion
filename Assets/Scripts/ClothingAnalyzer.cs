@@ -105,15 +105,37 @@ public class ClothingAnalyzer : MonoBehaviour
 
     IEnumerator CaptureAndAnalyze()
     {
-        WebCamTexture passthroughTexture = webCamTextureManager.WebCamTexture;
-        Texture2D screenshot = new Texture2D(passthroughTexture.width, passthroughTexture.height, TextureFormat.RGB24, false);
-        Graphics.CopyTexture(passthroughTexture, screenshot);
+        Debug.Log("Analyzing passthrough camera");
 
-        string json = CreateGeminiRequest(screenshot);
+        // Wait until webcam is properly initialized
+        while (webCamTextureManager == null ||
+               webCamTextureManager.WebCamTexture == null ||
+               !webCamTextureManager.WebCamTexture.isPlaying)
+        {
+            yield return null;
+        }
+
+        WebCamTexture webCamTex = webCamTextureManager.WebCamTexture;
+
+        // Create a new texture matching the webcam dimensions
+        Texture2D capturedTexture = new Texture2D(webCamTex.width, webCamTex.height, TextureFormat.RGBA32, false);
+
+        // Get the pixels from the webcam texture
+        Color[] pixels = webCamTex.GetPixels();
+
+        // Apply to our texture
+        capturedTexture.SetPixels(pixels);
+        capturedTexture.Apply();
+
+        Debug.Log($"Captured texture: {webCamTex.width}x{webCamTex.height}");
+
+        string json = CreateGeminiRequest(capturedTexture);
         yield return SendToGeminiAPI(json);
 
-        Destroy(screenshot);
+        // Clean up
+        Destroy(capturedTexture);
     }
+
 
     string CreateGeminiRequest(Texture2D screenshot)
     {
