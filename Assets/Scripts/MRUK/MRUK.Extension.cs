@@ -456,6 +456,241 @@ namespace ChoreChampion.XR.MRUtilityKit
             return candidateDistance;
         }
 
+        #region IN-DEVELOPMENT(NOT-TESTED)
+
+        /// <summary>
+        /// Enum for specifying which edge to snap to on a surface.
+        /// </summary>
+        public enum SnapEdge
+        {
+            None = 0,
+            ClosestEdge = 1,
+            FurthestEdge = 2,
+            LeftEdge = 3,
+            RightEdge = 4
+        }
+
+        /// <summary>
+        /// Identifies the closest edge (Top, Bottom, Left, Right) of a rect to a given point.
+        /// </summary>
+        /// <param name="point">The local 2D point.</param>
+        /// <param name="rect">The rect to check against.</param>
+        /// <returns>The closest edge as a ClosestRectEdge enum.</returns>
+        private enum ClosestRectEdge
+        {
+            Left,
+            Right,
+            Top,
+            Bottom
+        }
+
+        private static ClosestRectEdge GetClosestRectEdge(Vector2 point, Rect rect)
+        {
+            float distLeft = Mathf.Abs(point.x - rect.xMin);
+            float distRight = Mathf.Abs(point.x - rect.xMax);
+            float distBottom = Mathf.Abs(point.y - rect.yMin);
+            float distTop = Mathf.Abs(point.y - rect.yMax);
+            float minDist = Mathf.Min(distLeft, distRight, distBottom, distTop);
+            if (minDist == distLeft) return ClosestRectEdge.Left;
+            if (minDist == distRight) return ClosestRectEdge.Right;
+            if (minDist == distBottom) return ClosestRectEdge.Bottom;
+            return ClosestRectEdge.Top;
+        }
+
+        /// <summary>
+        /// Finds a position on the specified edge of the surface, relative to the user's position.
+        /// </summary>
+        /// <param name="surface">The surface to evaluate.</param>
+        /// <param name="testPosition">The user's world position.</param>
+        /// <param name="minDistanceToEdge">Minimum distance from any edge.</param>
+        /// <param name="mappedPosition">The mapped 2D position on the surface.</param>
+        /// <param name="edgePosition">The resulting world position on the edge.</param>
+        /// <param name="normal">The normal at the edge position.</param>
+        /// <param name="snapEdge">Which edge to snap to.</param>
+        /// <param name="localOffset">Optional local offset to apply after edge selection.</param>
+        /// <param name="clampOffsetToBounds">Whether to clamp the offset to surface bounds.</param>
+        /// <returns>Distance from the test position to the chosen edge position.</returns>
+        /// <exception cref="ArgumentException">Thrown if snapEdge is None or invalid.</exception>
+        public static float GetEdgePositionOnSurface(
+            this Surface surface,
+            Vector3 testPosition,
+            float minDistanceToEdge,
+            out Vector2 mappedPosition,
+            out Vector3 edgePosition,
+            out Vector3 normal,
+            SnapEdge snapEdge,
+            Vector2? localOffset = null,
+            Clamp2DValues clampOffsetToBounds = Clamp2DValues.None)
+        {
+            if (snapEdge == SnapEdge.None)
+            {
+                throw new ArgumentException("SnapEdge must not be None.", nameof(snapEdge));
+            }
+
+            edgePosition = Vector3.zero;
+            mappedPosition = Vector2.zero;
+            normal = surface.Transform.MultiplyVector(Vector3.forward).normalized;
+            MRUKAnchor anchor = surface.Anchor;
+            Vector3 localPosition = surface.Transform.inverse.MultiplyPoint3x4(testPosition);
+
+            if (anchor.VolumeBounds.HasValue)
+            {
+                Rect surfaceBounds = CreateRectWithMinimumDistanceToEdge(surface.Bounds, minDistanceToEdge);
+                Vector2 local2D = new Vector2(localPosition.x, localPosition.y);
+                Vector2 clamped2D = local2D;
+
+                ClosestRectEdge closestEdge = GetClosestRectEdge(local2D, surfaceBounds);
+                ClosestRectEdge targetEdge = closestEdge;
+
+                switch (snapEdge)
+                {
+                    case SnapEdge.ClosestEdge:
+                        targetEdge = closestEdge;
+                        break;
+                    case SnapEdge.FurthestEdge:
+                        // Opposite of closest edge
+                        targetEdge = closestEdge switch
+                        {
+                            ClosestRectEdge.Left => ClosestRectEdge.Right,
+                            ClosestRectEdge.Right => ClosestRectEdge.Left,
+                            ClosestRectEdge.Top => ClosestRectEdge.Bottom,
+                            ClosestRectEdge.Bottom => ClosestRectEdge.Top,
+                            _ => closestEdge
+                        };
+                        break;
+                    case SnapEdge.LeftEdge:
+                        targetEdge = closestEdge switch
+                        {
+                            ClosestRectEdge.Left => ClosestRectEdge.Bottom,
+                            ClosestRectEdge.Right => ClosestRectEdge.Top,
+                            ClosestRectEdge.Top => ClosestRectEdge.Left,
+                            ClosestRectEdge.Bottom => ClosestRectEdge.Right,
+                            _ => closestEdge
+                        };
+                        break;
+                    case SnapEdge.RightEdge:
+                        targetEdge = closestEdge switch
+                        {
+                            ClosestRectEdge.Left => ClosestRectEdge.Top,
+                            ClosestRectEdge.Right => ClosestRectEdge.Bottom,
+                            ClosestRectEdge.Top => ClosestRectEdge.Right,
+                            ClosestRectEdge.Bottom => ClosestRectEdge.Left,
+                            _ => closestEdge
+                        };
+                        break;
+                    default:
+                        throw new ArgumentException($"Unsupported SnapEdge: {snapEdge}", nameof(snapEdge));
+                }
+
+                // Snap to the target edge
+                switch (targetEdge)
+                {
+                    case ClosestRectEdge.Left:
+                        clamped2D = new Vector2(surfaceBounds.xMin, Mathf.Clamp(local2D.y, surfaceBounds.yMin, surfaceBounds.yMax));
+                        break;
+                    case ClosestRectEdge.Right:
+                        clamped2D = new Vector2(surfaceBounds.xMax, Mathf.Clamp(local2D.y, surfaceBounds.yMin, surfaceBounds.yMax));
+                        break;
+                    case ClosestRectEdge.Top:
+                        clamped2D = new Vector2(Mathf.Clamp(local2D.x, surfaceBounds.xMin, surfaceBounds.xMax), surfaceBounds.yMax);
+                        break;
+                    case ClosestRectEdge.Bottom:
+                        clamped2D = new Vector2(Mathf.Clamp(local2D.x, surfaceBounds.xMin, surfaceBounds.xMax), surfaceBounds.yMin);
+                        break;
+                }
+
+                // Offset logic (mirrored from GetClosestPositionToSurface)
+                Vector2 center2D = surfaceBounds.center;
+                Vector2 dirToCenter = (center2D - clamped2D).normalized;
+                int forwardDir = dirToCenter.y >= 0f ? 1 : -1;
+                int rightDir = dirToCenter.x >= 0f ? 1 : -1;
+                Vector2 offsetAxis = new Vector2(rightDir, forwardDir);
+                Vector2 auxOffset = localOffset != null ? (Vector2)localOffset : Vector2.zero;
+                Vector2 offset = new Vector2(auxOffset.x * offsetAxis.x, auxOffset.y * offsetAxis.y);
+                clamped2D += offset;
+
+                if (clampOffsetToBounds != Clamp2DValues.None)
+                {
+                    float clampedX = clamped2D.x;
+                    float clampedY = clamped2D.y;
+                    if (clampOffsetToBounds == Clamp2DValues.X || clampOffsetToBounds == Clamp2DValues.XandY)
+                    {
+                        clampedX = Mathf.Clamp(clamped2D.x, surfaceBounds.xMin, surfaceBounds.xMax);
+                    }
+                    if (clampOffsetToBounds == Clamp2DValues.Y || clampOffsetToBounds == Clamp2DValues.XandY)
+                    {
+                        clampedY = Mathf.Clamp(clamped2D.y, surfaceBounds.yMin, surfaceBounds.yMax);
+                    }
+                    clamped2D = new Vector2(clampedX, clampedY);
+                }
+
+                Vector3 localEdgePoint = new Vector3(clamped2D.x, clamped2D.y, 0f);
+                edgePosition = surface.Transform.MultiplyPoint3x4(localEdgePoint);
+                mappedPosition = clamped2D;
+                return Vector3.Distance(edgePosition, testPosition);
+            }
+            else if (anchor.PlaneRect.HasValue)
+            {
+                // For plane, only support ClosestEdge for now, others can be extended later
+                var planeRect = anchor.PlaneRect.Value;
+                localPosition.z = 0f;
+                Vector2 local2D = new Vector2(localPosition.x, localPosition.y);
+                Vector2 clamped2D = local2D;
+                ClosestRectEdge closestEdge = GetClosestRectEdge(local2D, planeRect);
+                ClosestRectEdge targetEdge = closestEdge;
+                switch (snapEdge)
+                {
+                    case SnapEdge.ClosestEdge:
+                        targetEdge = closestEdge;
+                        break;
+                    default:
+                        throw new ArgumentException($"SnapEdge {snapEdge} not implemented for plane surfaces.", nameof(snapEdge));
+                }
+                switch (targetEdge)
+                {
+                    case ClosestRectEdge.Left:
+                        clamped2D = new Vector2(planeRect.xMin, Mathf.Clamp(local2D.y, planeRect.yMin, planeRect.yMax));
+                        break;
+                    case ClosestRectEdge.Right:
+                        clamped2D = new Vector2(planeRect.xMax, Mathf.Clamp(local2D.y, planeRect.yMin, planeRect.yMax));
+                        break;
+                    case ClosestRectEdge.Top:
+                        clamped2D = new Vector2(Mathf.Clamp(local2D.x, planeRect.xMin, planeRect.xMax), planeRect.yMax);
+                        break;
+                    case ClosestRectEdge.Bottom:
+                        clamped2D = new Vector2(Mathf.Clamp(local2D.x, planeRect.xMin, planeRect.xMax), planeRect.yMin);
+                        break;
+                }
+                Vector3 offset = localOffset != null ? new Vector3(((Vector2)localOffset).x, ((Vector2)localOffset).y, 0f) : Vector3.zero;
+                Vector3 localEdgePoint = new Vector3(clamped2D.x, clamped2D.y, 0f) + offset;
+                if (clampOffsetToBounds != Clamp2DValues.None)
+                {
+                    float clampedX = localEdgePoint.x;
+                    float clampedY = localEdgePoint.y;
+                    if (clampOffsetToBounds == Clamp2DValues.X || clampOffsetToBounds == Clamp2DValues.XandY)
+                    {
+                        clampedX = Mathf.Clamp(localEdgePoint.x, planeRect.xMin, planeRect.xMax);
+                    }
+                    if (clampOffsetToBounds == Clamp2DValues.Y || clampOffsetToBounds == Clamp2DValues.XandY)
+                    {
+                        clampedY = Mathf.Clamp(localEdgePoint.y, planeRect.yMin, planeRect.yMax);
+                    }
+                    localEdgePoint = new Vector3(clampedX, clampedY, 0f);
+                }
+                edgePosition = anchor.transform.TransformPoint(localEdgePoint);
+                mappedPosition = new Vector2(localEdgePoint.x, localEdgePoint.y);
+                return Vector3.Distance(edgePosition, testPosition);
+            }
+            else
+            {
+                throw new ArgumentException("Surface must have either VolumeBounds or PlaneRect.", nameof(surface));
+            }
+        }
+
+        #endregion
+
+        #region AUX-METHODS
+
         // Snap to nearest edge of the rect, based on direction from center
         private static Vector2 SnapToNearestEdge(Vector2 local2D, Rect rect)
         {
@@ -509,6 +744,8 @@ namespace ChoreChampion.XR.MRUtilityKit
             newRect.yMax -= minDistanceToEdge;
             return newRect;
         }
+
+        #endregion
     }
 
 }

@@ -2,6 +2,7 @@ using ChoreChampion.XR.MRUtilityKit;
 using DG.Tweening;
 using LastOfDust;
 using Meta.XR.MRUtilityKit;
+using NaughtyAttributes;
 using UnityEngine;
 using Utils;
 
@@ -26,6 +27,7 @@ namespace LastOfDust
             base.Initialize(anchor, surface);
         }
 
+        [Button]
         public override void Delete(GameObject obj = null, bool triggerEvent = true)
         {
             //Debug.Log($"LodSlimePrefabManager DELETE Zoom out");
