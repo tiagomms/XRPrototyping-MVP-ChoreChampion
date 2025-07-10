@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using UnityEngine.AI;
 using System.Linq;
 using LastOfDust;
+using DG.Tweening;
 
 namespace Chores
 {
@@ -72,8 +73,15 @@ namespace Chores
             //randomMonsterSpawner.onSurfaceCleaned.AddListener(OnSurfaceCleaned);
             //randomMonsterSpawner.onAnchorCleaned.AddListener(OnAnchorCleaned);
             randomMonsterSpawner.onRoomCleaned.AddListener(OnRoomCleaned);
+            inGameUI.onCountDownFinished.AddListener(ShowMonsters);
 
             onChoreTimesUp.AddListener(OnTimesUp);
+        }
+
+        private void ShowMonsters()
+        {
+            timeElapsed = 0f;
+            //randomMonsterSpawner.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.OutBack);
         }
 
         protected virtual void OnDestroy()
@@ -81,6 +89,7 @@ namespace Chores
             //randomMonsterSpawner.onSurfaceCleaned.RemoveListener(OnSurfaceCleaned);
             //randomMonsterSpawner.onAnchorCleaned.RemoveListener(OnAnchorCleaned);
             randomMonsterSpawner.onRoomCleaned.RemoveListener(OnRoomCleaned);
+            inGameUI.onCountDownFinished.RemoveListener(ShowMonsters);
 
             onChoreTimesUp.RemoveListener(OnTimesUp);
         }
@@ -110,6 +119,7 @@ namespace Chores
             
             // all of them are spawned in 
             sceneNav.Agents = randomMonsterSpawner.gameObject.GetComponentsInChildren<NavMeshAgent>().ToList();
+            //randomMonsterSpawner.transform.localScale = Vector3.zero;
             /*
             allSlimes = randomMonsterSpawner.GetAllSpawnedObjects()
                 .Select(obj => obj.GetComponent<LodSlime>())
