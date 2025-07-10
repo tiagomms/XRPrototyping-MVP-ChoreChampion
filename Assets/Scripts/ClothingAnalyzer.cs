@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using PassthroughCameraSamples;
+using TMPro;
 
 [System.Serializable]
 public class ClothingAnalysisResult
@@ -38,6 +39,12 @@ public class ClothingAnalyzer : MonoBehaviour
     [Header("Camera Setup")]
     public WebCamTextureManager webCamTextureManager;
 
+  // --- NEW: TextMeshPro UI References ---
+    [Header("UI Display")]
+    public TextMeshProUGUI roomTidyStatusText; // For "Tidy" / "Untidy"
+    public TextMeshProUGUI clothingDetailsText; // For "T-shirt: 2, Socks: 5" etc.
+    // --- END NEW ---
+
     public ClothingAnalysisResult CurrentResult { get; private set; }
     public event Action<ClothingAnalysisResult> OnAnalysisComplete;
 
@@ -47,8 +54,19 @@ public class ClothingAnalyzer : MonoBehaviour
         FoldingGame  // Needs detailed clothing counts
     }
 
-    void Start() => StartCoroutine(InitializeAndAnalyze());
+  void Start()
+    {
+        // Subscribe to your own event when the script starts
+        OnAnalysisComplete += DisplayResultsOnUI;
+        StartCoroutine(InitializeAndAnalyze());
+    }
 
+    // --- NEW: Unsubscribe OnDisable to prevent memory leaks ---
+    void OnDisable()
+    {
+        OnAnalysisComplete -= DisplayResultsOnUI;
+    }
+    // --- END NEW ---
     IEnumerator InitializeAndAnalyze()
     {
         Debug.Log("[UnifiedAnalyzer] Initializing...");
@@ -106,7 +124,7 @@ public class ClothingAnalyzer : MonoBehaviour
         {
             AnalysisType.LaundryToss => 
                 @"Analyze this room for laundry. Respond with:
-                RoomTidyStatus: [Tidy/Untidy]
+                RoomTidyStatus: [Tidy/NOT SO TIDY]
                 Then list any clothing items as: [ClothingType]: [Count]",
                 
             AnalysisType.FoldingGame =>
@@ -214,9 +232,53 @@ public class ClothingAnalyzer : MonoBehaviour
         }
     }
 
+    // --- NEW: Method to display results on UI ---
+    void DisplayResultsOnUI(ClothingAnalysisResult result)
+    {
+        if (result == null)
+        {
+            if (roomTidyStatusText != null) roomTidyStatusText.text = "Analysis Failed";
+            if (clothingDetailsText != null) clothingDetailsText.text = "";
+            return;
+        }
 
-// Add these classes for JSON parsing
-[System.Serializable]
+        if (roomTidyStatusText != null)
+        {
+            // For LaundryToss, display the tidy status
+            if (analysisType == AnalysisType.LaundryToss)
+            {
+                roomTidyStatusText.text = result.RoomTidyStatus;
+            }
+            else // For FoldingGame, maybe show a generic status or total count here
+            {
+                roomTidyStatusText.text = $"Total Items: {result.TotalClothingCount}";
+            }
+        }
+
+        if (clothingDetailsText != null)
+        {
+            StringBuilder sb = new StringBuilder();
+            if (result.ClothingCounts.Count > 0)
+            {
+                foreach (var item in result.ClothingCounts)
+                {
+                    sb.AppendLine($"{item.Key}: {item.Value}");
+                }
+            }
+            else
+            {
+                sb.AppendLine("No specific clothing items detected.");
+            }
+            clothingDetailsText.text = sb.ToString();
+        }
+        
+        LogResults(); // Keep your debug log for convenience
+    }
+    // --- END NEW ---
+
+
+    // Add these classes for JSON parsing
+    [System.Serializable]
 private class GeminiResponse
 {
     public Candidate[] candidates;
