@@ -18,6 +18,7 @@ namespace Chores
     {
         [Header("Score System")]
         [SerializeField] private LastOfDustPointSystem pointSystem;
+        public LastOfDustPointSystem PointSystem => pointSystem;
 
         [Header("Scene Navigation")]
         [SerializeField] private SceneNavigation sceneNav;

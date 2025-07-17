@@ -9,30 +9,15 @@ using System.Collections.Generic;
 using NaughtyAttributes;
 using TMPro;
 using UnityEngine.Events;
+using ChoreChampion.UI;
 
 namespace LastOfDust.UI
 {
     public class Lod04HudInGameUI : BaseUI
     {
         [Header("UI")]
-        [SerializeField] protected GameObject inGameUI;
-        [SerializeField] protected GameObject countdownSection;
-        [SerializeField] private TextMeshProUGUI countdownText;
-        [SerializeField] private AudioSource initialSound;
-        [SerializeField] private Animator countdownAnimator;
+        [SerializeField] private InGameUIReferences inGameUIReferences;
         [SerializeField] private float countdownTime = 3f;
-
-
-        [SerializeField] protected GameObject timerScoreSection;
-        [SerializeField] protected TMP_Text timerText;
-        [SerializeField] protected TMP_Text scoreText;
-
-        [Header("Next")]
-        [SerializeField] protected Lod05EndGameUI next;
-
-        [Header("Debug - Readonly")]
-        [SerializeField] protected string timerStr = "00:00";
-        [SerializeField] protected string scoreStr = "0";
 
         private float _currentTime;
         private bool _isCountingDown;
@@ -43,64 +28,57 @@ namespace LastOfDust.UI
         protected override void OnEnable()
         {
             base.OnEnable();
-            countdownAnimator.enabled = false;
-            //countdownSection.gameObject.SetActive(false);
-            //timerScoreSection.SetActive(false);
 
             if (LastOfDustChore.Instance == null) return;
             StartCountDown();
-
-            UpdateTimer(LastOfDustChore.Instance.ChoreCurrentTime);
-            UpdateScore(LastOfDustChore.Instance.Score);
         }
 
         public void UpdateTimer(float newTime)
         {
-            timerStr = string.Format("{0:00}:{1:00}", Mathf.FloorToInt(newTime / 60), Mathf.FloorToInt(newTime % 60));
-
-            if (timerText != null)
-            {
-                timerText.text = timerStr;
-            }
+            inGameUIReferences.UpdateTimer(newTime);
         }
 
         public void UpdateScore(float newScore)
         {
-            scoreStr = Mathf.FloorToInt(newScore).ToString();
-
-            if (scoreText != null)
-            {
-                scoreText.text = scoreStr;
-            }
+            inGameUIReferences.UpdateScore(newScore);
         }
 
+        /**
+         * Start the countdown and update the UI accordingly.
+         */
         public void StartCountDown()
         {
             _isCountingDown = true;
             _currentTime = countdownTime;
-            UIToggle(_isCountingDown);
-            countdownAnimator.enabled = true;
 
-            if (initialSound)
+            inGameUIReferences.ShowCountdownSection();
+            inGameUIReferences.UpdateCountdown(_currentTime);
+        }
+
+        /**
+         * Update the countdown text and handle completion.
+         */
+        private void UpdateCountdownText()
+        {
+            _currentTime -= Time.deltaTime;
+            inGameUIReferences.UpdateCountdown(_currentTime);
+
+            if (_currentTime <= 0f)
             {
-                initialSound.Play();
+                OnCountdownComplete();
             }
         }
 
-        private void UIToggle(bool isCountingDown)
-        {
-            countdownSection.gameObject.SetActive(isCountingDown);
-            timerScoreSection.SetActive(!isCountingDown);
-        }
-
+        /**
+         * Handle countdown completion and switch UI to timer/score section.
+         */
         private void OnCountdownComplete()
         {
             _isCountingDown = false;
             _currentTime = 0f;
             onCountDownFinished.Invoke();
-            countdownAnimator.enabled = false;
 
-            UIToggle(_isCountingDown);
+            inGameUIReferences.ShowTimerSection();
         }
 
         void Update()
@@ -115,23 +93,15 @@ namespace LastOfDust.UI
             }
         }
 
+        /**
+         * Update timer and score UI during gameplay.
+         */
         private void UpdateInGameText()
         {
-            if (LastOfDustChore.Instance.IsChoreActive)
+            if (LastOfDustChore.Instance != null && LastOfDustChore.Instance.IsChoreActive)
             {
                 UpdateTimer(LastOfDustChore.Instance.ChoreCurrentTime);
                 UpdateScore(LastOfDustChore.Instance.Score);
-            }
-        }
-
-        private void UpdateCountdownText()
-        {
-            _currentTime -= Time.deltaTime;
-            countdownText.text = Mathf.CeilToInt(_currentTime).ToString();
-
-            if (_currentTime <= 0f)
-            {
-                OnCountdownComplete();
             }
         }
     }

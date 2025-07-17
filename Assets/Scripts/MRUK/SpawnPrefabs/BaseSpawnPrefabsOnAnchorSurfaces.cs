@@ -18,6 +18,12 @@ namespace ChoreChampion.XR.MRUtilityKit
     /// </summary>
     public abstract class BaseSpawnPrefabsOnAnchorSurfaces : MonoBehaviour
     {
+        public enum SpawnAmountType
+        {
+            AmountPerSurface = 0,
+            DensityPerM2 = 1
+        }
+
         /// <summary>
         /// Anchor's Surface data, useful for prefab spawning on surfaces
         /// </summary>
@@ -83,11 +89,19 @@ namespace ChoreChampion.XR.MRUtilityKit
         [SerializeField, Tooltip("Prefab to be placed into the scene, or object in the scene to be moved around.")]
         public GameObject SpawnObject;
 
+        [SerializeField, Tooltip("Spawn objects based on amount per surface or density on surface (per squared meter).")]
+        public SpawnAmountType SpawnType = SpawnAmountType.AmountPerSurface;
+        
         /// <summary>
         /// Number of SpawnObject(s) to place into the scene per surface, only applies to Prefabs.
         /// </summary>
         [SerializeField, Tooltip("Number of SpawnObject(s) to place into the scene per surface, only applies to Prefabs.")]
+        [ShowIf(nameof(SpawnType), SpawnAmountType.AmountPerSurface)]
         public int SpawnAmountPerSurface = 1000;
+
+        [SerializeField, Tooltip("Spawn density per squared meter surface. Only used when SpawnBasedOn.DensityPerM2 is selected")]
+        [ShowIf(nameof(SpawnType), SpawnAmountType.DensityPerM2)]
+        public float DensityPerSurface = 20f;
 
         /// <summary>
         /// Maximum number of times to attempt spawning/moving an object before giving up.
@@ -371,9 +385,12 @@ namespace ChoreChampion.XR.MRUtilityKit
         /// Sets the spawn amount.
         /// </summary>
         /// <param name="newMax">New maximum spawn amount.</param>
-        public virtual void SetSpawnAmount(int newMax)
+        public virtual void SetSpawnAmount(float newMax)
         {
-            SpawnAmountPerSurface = newMax;
+            if (SpawnType == SpawnAmountType.AmountPerSurface)
+                SpawnAmountPerSurface = Mathf.RoundToInt(newMax);
+            else if (SpawnType == SpawnAmountType.DensityPerM2)
+                DensityPerSurface = newMax;
         }
 
 
@@ -537,7 +554,9 @@ namespace ChoreChampion.XR.MRUtilityKit
                 MRUKExtension.Surface surface = surfaceList[surfaceIndex];
 
                 int i = surfaceData.SpawnedObjectsPerSurface[surface].Count;
-                while (i < SpawnAmountPerSurface)
+
+                int maxSpawnAmount = CalculateMaxSpawnAmountInAnchor(surface);
+                while (i < maxSpawnAmount)
                 {
                     bool foundValidSpawnPosition = false;
                     for (int j = 0; j < MaxIterations; ++j)
@@ -609,7 +628,7 @@ namespace ChoreChampion.XR.MRUtilityKit
 
                     if (!foundValidSpawnPosition)
                     {
-                        Debug.LogWarning($"Failed to find valid spawn position after {MaxIterations} iterations. Only spawned {i} prefabs instead of {SpawnAmountPerSurface}.");
+                        Debug.LogWarning($"Failed to find valid spawn position after {MaxIterations} iterations. Only spawned {i} prefabs instead of {maxSpawnAmount}.");
                         break;
                     }
 
@@ -618,6 +637,17 @@ namespace ChoreChampion.XR.MRUtilityKit
             }
 
             return true;
+        }
+
+        private int CalculateMaxSpawnAmountInAnchor(MRUKExtension.Surface surface)
+        {
+            if (SpawnType == SpawnAmountType.DensityPerM2)
+            {
+                int densityAmount = Mathf.RoundToInt(surface.UsableArea * DensityPerSurface);
+                Debug.Log($"{nameof(CalculateMaxSpawnAmountInAnchor)} - for surface with usable area {surface.UsableArea.ToString("0.##")} - spawn {densityAmount}");
+                return Mathf.RoundToInt(surface.UsableArea * DensityPerSurface);
+            }
+            return SpawnAmountPerSurface;
         }
 
         protected MRUK.SurfaceType GetSurfaceTypes()

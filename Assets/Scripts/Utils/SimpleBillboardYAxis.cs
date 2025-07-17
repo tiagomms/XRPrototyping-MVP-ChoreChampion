@@ -26,7 +26,7 @@ namespace Utils
     {
         protected override Vector3 GetDirection()
         {
-            var direction = transform.position - _mainCamera.transform.position;
+            var direction = transform.position - _mainCameraTransform.position;
             // Flatten the direction vector so it only rotates around Y
             direction.y = 0f;
             return direction;
