@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 1e31d9176bb4e8d4a903fce62147a20a
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48850
+  packageName: Cartoon GUI Pack
+  packageVersion: 2.0.5
+  assetPath: Assets/GUIPackCartoon/Demo/Prefabs/UI Elements/Items/Amount Circle/Amount
+    Circle.prefab
+  uploadId: 769476
