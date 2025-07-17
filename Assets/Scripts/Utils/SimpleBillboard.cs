@@ -37,20 +37,29 @@ namespace Utils
         [ShowIf("DoUpdate"), Header("Rotation Settings")]
         [SerializeField, Range(0f, 1f)] protected float rotationSpeed = 0.1f;
 
-        protected Camera _mainCamera;
+        protected Transform _mainCameraTransform;
         protected Quaternion _targetRotation;
+
+        protected virtual void Awake()
+        {
+            _mainCameraTransform = Camera.main.transform;
+        }
 
         protected virtual void Start()
         {
-            _mainCamera = Camera.main;
             _targetRotation = transform.rotation;
 
             // If toStartRotated is true, rotate immediately to face the camera
             if (toStartRotated)
             {
-                Vector3 direction = GetDirection();
-                transform.rotation = Quaternion.LookRotation(direction);
+                ForceCameraLookRotation();
             }
+        }
+
+        public void ForceCameraLookRotation()
+        {
+            Vector3 direction = GetDirection();
+            transform.rotation = Quaternion.LookRotation(direction);
         }
 
         protected virtual void Update()
@@ -71,7 +80,7 @@ namespace Utils
 
         protected virtual Vector3 GetDirection()
         {
-            return transform.position - _mainCamera.transform.position;
+            return transform.position - _mainCameraTransform.position;
         }
 
         protected void LookTowards(Vector3 direction)

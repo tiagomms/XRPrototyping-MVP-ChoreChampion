@@ -13,9 +13,13 @@ namespace Chores
     {
         [Header("Points")]
         [SerializeField] private float monsterKillPoints = 1f;
+        public float MonsterKillPoints => monsterKillPoints;
         [SerializeField] private float surfaceCleanPoints = 10f;
+        public float SurfaceCleanPoints => surfaceCleanPoints;
         [SerializeField] private float anchorCleanPoints = 15f;
+        public float AnchorCleanPoints => anchorCleanPoints;
         [SerializeField] private float roomCleanPoints = 30f;
+        public float RoomCleanPoints => roomCleanPoints;
         
         [Header("Spawners")]
         [SerializeField] private RandomSpawnPrefabsOnAnchorSurfaces randomMonsterSpawner;
